@@ -5,6 +5,9 @@ from app.config.database import engine
 from app.db.base import Base
 from app.models.user import User
 from app.models.role import Role
+# Comentado temporalmente hasta implementación futura
+# from app.models.device import UserDevice, UserNotificationPreference
+# from app.models.notification import Notification
 # Importar aquí el resto de modelos para asegurar que se creen todas las tablas
 
 logging.basicConfig(level=logging.INFO)

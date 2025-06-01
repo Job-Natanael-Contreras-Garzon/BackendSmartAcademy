@@ -34,5 +34,13 @@ class User(Base):
     # Relaciones (se configurarán cuando implementemos las tablas relacionadas)
     roles = relationship("Role", secondary=user_role, back_populates="users")
     
+    # Relaciones con dispositivos y preferencias de notificaciones
+    devices = relationship("UserDevice", back_populates="user", cascade="all, delete-orphan")
+    notification_preferences = relationship("UserNotificationPreference", back_populates="user", cascade="all, delete-orphan", uselist=False)
+    
+    # Relaciones con notificaciones
+    received_notifications = relationship("Notification", foreign_keys="[Notification.recipient_id]", backref="recipient")
+    sent_notifications = relationship("Notification", foreign_keys="[Notification.sender_id]", backref="sender")
+    
     # Nota: Estas relaciones se implementarán cuando los modelos correspondientes existan
     # tutored_students = relationship("StudentTutor", back_populates="tutor")

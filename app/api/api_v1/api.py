@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.api.api_v1.endpoints import (auth, user, role, student, teacher, 
                                        group, course, subject, period, grade,
                                        attendance, tutor, tuition, notification,
-                                       dashboard, predictions)
+                                       dashboard, predictions) # device - comentado temporalmente
 
 api_router = APIRouter()
 
@@ -40,3 +40,6 @@ api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboar
 
 # Predicciones académicas
 api_router.include_router(predictions.router, prefix="/predictions", tags=["Predicciones"])
+
+# Dispositivos móviles y preferencias de notificaciones - comentado temporalmente
+# api_router.include_router(device.router, prefix="/devices", tags=["Dispositivos"])

@@ -1,8 +1,11 @@
-from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
+from typing import Any, List, Optional, Dict
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from datetime import datetime
+
+# Comentado temporalmente hasta implementación futura
+# from app.core.push_notifications import push_service
 
 from app.config.database import get_db
 from app.core.security import get_current_active_superuser, get_current_active_user
@@ -17,6 +20,42 @@ from app.schemas.notification import (
 )
 
 router = APIRouter()
+
+# Comentado temporalmente hasta implementación futura
+# async def send_push_notification_async(user_id: int, title: str, body: str, notification_type: str, db: Session):
+#     """Función asíncrona para enviar notificaciones push"""
+#     # Verificar si el usuario tiene dispositivos registrados y preferencias de notificaciones
+#     devices_result = db.execute(
+#         text("""
+#         SELECT d.device_token, d.device_platform 
+#         FROM user_devices d
+#         JOIN user_notification_preferences p ON d.user_id = p.user_id
+#         WHERE d.user_id = :user_id AND d.is_active = TRUE
+#           AND p.enable_push = TRUE
+#           AND CASE 
+#                 WHEN :notification_type = 'academic' THEN p.enable_academic = TRUE
+#                 WHEN :notification_type = 'payment' THEN p.enable_payment = TRUE
+#                 WHEN :notification_type = 'attendance' THEN p.enable_attendance = TRUE
+#                 WHEN :notification_type = 'grade' THEN p.enable_grade = TRUE
+#                 WHEN :notification_type = 'general' THEN p.enable_general = TRUE
+#                 ELSE TRUE
+#               END
+#         """),
+#         {"user_id": user_id, "notification_type": notification_type}
+#     )
+#     
+#     devices = devices_result.all()
+#     if not devices:
+#         return
+#     
+#     # Enviar notificación a cada dispositivo del usuario
+#     for device in devices:
+#         await push_service.send_to_device(
+#             token=device.device_token,
+#             title=title,
+#             body=body,
+#             notification_type=notification_type
+#         )
 
 @router.post("/", response_model=NotificationResponse, status_code=status.HTTP_201_CREATED)
 async def create_notification(
@@ -91,6 +130,16 @@ async def create_notification(
         "read_at": notification.read_at
     }
     
+    # Comentado temporalmente hasta implementación futura
+    # background_tasks.add_task(
+    #     send_push_notification_async,
+    #     user_id=notification.recipient_id,
+    #     title=notification.title,
+    #     body=notification.content,
+    #     notification_type=notification.type,
+    #     db=db
+    # )
+    
     return notification_dict
 
 @router.post("/bulk", status_code=status.HTTP_201_CREATED)
@@ -156,6 +205,17 @@ async def create_bulk_notifications(
         created_count += 1
     
     db.commit()
+    
+    # Comentado temporalmente hasta implementación futura
+    # for recipient_id in recipient_ids:
+    #     background_tasks.add_task(
+    #         send_push_notification_async,
+    #         user_id=recipient_id,
+    #         title=title,
+    #         body=content,
+    #         notification_type=type,
+    #         db=db
+    #     )
     
     return {
         "message": f"Se han creado {created_count} notificaciones correctamente",
