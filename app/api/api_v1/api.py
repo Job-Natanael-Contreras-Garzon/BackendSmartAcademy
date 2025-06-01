@@ -2,7 +2,8 @@ from fastapi import APIRouter
 
 from app.api.api_v1.endpoints import (auth, user, role, student, teacher, 
                                        group, course, subject, period, grade,
-                                       attendance, tutor)
+                                       attendance, tutor, tuition, notification,
+                                       dashboard, predictions)
 
 api_router = APIRouter()
 
@@ -27,3 +28,15 @@ api_router.include_router(attendance.router, prefix="/attendance", tags=["Asiste
 
 # Relaciones tutor-estudiante
 api_router.include_router(tutor.router, prefix="/tutors", tags=["Tutores"])
+
+# Matrículas y pagos
+api_router.include_router(tuition.router, prefix="/tuitions", tags=["Matrículas y Pagos"])
+
+# Notificaciones
+api_router.include_router(notification.router, prefix="/notifications", tags=["Notificaciones"])
+
+# Dashboard y estadísticas
+api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
+
+# Predicciones académicas
+api_router.include_router(predictions.router, prefix="/predictions", tags=["Predicciones"])
