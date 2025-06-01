@@ -382,3 +382,629 @@ Authorization: Bearer {access_token}
   "message": "Usuario eliminado correctamente"
 }
 ```
+
+## 4. Gestión de Calificaciones (Grades)
+
+### 4.1. Crear Calificación (/api/v1/grades/)
+
+> **Importante**: Este endpoint requiere autenticación como profesor o administrador.
+
+**Método**: POST
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Request:**
+```json
+{
+  "student_id": 1,
+  "course_id": 2,
+  "period": "Primer trimestre",
+  "value": 85.5,
+  "date_recorded": "2025-05-15"
+}
+```
+
+**Response Exitosa (201 Created):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "course_id": 2,
+  "period": "Primer trimestre",
+  "value": 85.5,
+  "date_recorded": "2025-05-15"
+}
+```
+
+**Response Fallida (400 Bad Request):**
+```json
+{
+  "detail": "El valor de la calificación debe estar entre 0 y 100"
+}
+```
+
+**Response Fallida (404 Not Found):**
+```json
+{
+  "detail": "Estudiante no encontrado"
+}
+```
+
+### 4.2. Listar Calificaciones (/api/v1/grades/)
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Parámetros de consulta opcionales:**
+- `student_id`: Filtrar por ID de estudiante
+- `course_id`: Filtrar por ID de curso
+- `period`: Filtrar por periodo académico
+- `date_from`: Filtrar por fecha de registro (desde)
+- `date_to`: Filtrar por fecha de registro (hasta)
+- `min_value`: Filtrar por valor mínimo de calificación
+- `max_value`: Filtrar por valor máximo de calificación
+- `skip`: Número de registros a omitir (paginación)
+- `limit`: Número máximo de registros a devolver
+
+**Response Exitosa (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "student_id": 1,
+    "course_id": 2,
+    "period": "Primer trimestre",
+    "value": 85.5,
+    "date_recorded": "2025-05-15"
+  },
+  {
+    "id": 2,
+    "student_id": 2,
+    "course_id": 2,
+    "period": "Primer trimestre",
+    "value": 92.0,
+    "date_recorded": "2025-05-16"
+  }
+]
+```
+
+### 4.3. Obtener Detalle de Calificación (/api/v1/grades/{grade_id})
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "student_name": "Juan Pérez",
+  "course_id": 2,
+  "subject_name": "Matemáticas",
+  "teacher_name": "Profesor Ejemplo",
+  "group_name": "3ro A Primaria",
+  "period": "Primer trimestre",
+  "value": 85.5,
+  "date_recorded": "2025-05-15"
+}
+```
+
+### 4.4. Actualizar Calificación (/api/v1/grades/{grade_id})
+
+> **Importante**: Este endpoint requiere autenticación como profesor asignado al curso o administrador.
+
+**Método**: PUT
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Request:**
+```json
+{
+  "value": 88.0,
+  "period": "Primer trimestre",
+  "date_recorded": "2025-05-17"
+}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "course_id": 2,
+  "period": "Primer trimestre",
+  "value": 88.0,
+  "date_recorded": "2025-05-17"
+}
+```
+
+### 4.5. Eliminar Calificación (/api/v1/grades/{grade_id})
+
+> **Importante**: Este endpoint requiere autenticación como profesor asignado al curso o administrador.
+
+**Método**: DELETE
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "message": "Calificación eliminada correctamente"
+}
+```
+
+## 5. Gestión de Asistencia (Attendance)
+
+### 5.1. Registrar Asistencia (/api/v1/attendance/)
+
+> **Importante**: Este endpoint requiere autenticación como profesor o administrador.
+
+**Método**: POST
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Request:**
+```json
+{
+  "student_id": 1,
+  "course_id": 2,
+  "date": "2025-05-20",
+  "status": "presente",
+  "notes": "Llegó puntual"
+}
+```
+
+> **Nota**: Los valores válidos para `status` son: "presente", "ausente", "tarde", "justificado" (en minúsculas)
+
+**Response Exitosa (201 Created):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "course_id": 2,
+  "date": "2025-05-20",
+  "status": "presente",
+  "notes": "Llegó puntual"
+}
+```
+
+### 5.2. Listar Registros de Asistencia (/api/v1/attendance/)
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Parámetros de consulta opcionales:**
+- `student_id`: Filtrar por ID de estudiante
+- `course_id`: Filtrar por ID de curso
+- `date_from`: Filtrar por fecha (desde)
+- `date_to`: Filtrar por fecha (hasta)
+- `status`: Filtrar por estado de asistencia
+- `skip`: Número de registros a omitir (paginación)
+- `limit`: Número máximo de registros a devolver
+
+**Response Exitosa (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "student_id": 1,
+    "course_id": 2,
+    "date": "2025-05-20",
+    "status": "presente",
+    "notes": "Llegó puntual"
+  },
+  {
+    "id": 2,
+    "student_id": 2,
+    "course_id": 2,
+    "date": "2025-05-20",
+    "status": "tarde",
+    "notes": "Llegó 10 minutos tarde"
+  }
+]
+```
+
+### 5.3. Obtener Detalle de Asistencia (/api/v1/attendance/{attendance_id})
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "student_name": "Juan Pérez",
+  "course_id": 2,
+  "subject_name": "Matemáticas",
+  "teacher_name": "Profesor Ejemplo",
+  "group_name": "3ro A Primaria",
+  "date": "2025-05-20",
+  "status": "presente",
+  "notes": "Llegó puntual"
+}
+```
+
+### 5.4. Actualizar Registro de Asistencia (/api/v1/attendance/{attendance_id})
+
+> **Importante**: Este endpoint requiere autenticación como profesor asignado al curso o administrador.
+
+**Método**: PUT
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Request:**
+```json
+{
+  "status": "justificado",
+  "notes": "Presentó justificante médico"
+}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "course_id": 2,
+  "date": "2025-05-20",
+  "status": "justificado",
+  "notes": "Presentó justificante médico"
+}
+```
+
+### 5.5. Eliminar Registro de Asistencia (/api/v1/attendance/{attendance_id})
+
+> **Importante**: Este endpoint requiere autenticación como profesor asignado al curso o administrador.
+
+**Método**: DELETE
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "message": "Registro de asistencia eliminado correctamente"
+}
+```
+
+### 5.6. Estadísticas de Asistencia por Curso (/api/v1/attendance/stats/course/{course_id})
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Parámetros de consulta opcionales:**
+- `date_from`: Filtrar por fecha (desde)
+- `date_to`: Filtrar por fecha (hasta)
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "total_classes": 20,
+  "present_count": 15,
+  "absent_count": 2,
+  "late_count": 2,
+  "excused_count": 1,
+  "attendance_rate": 80.0
+}
+```
+
+### 5.7. Estadísticas de Asistencia por Estudiante en un Curso (/api/v1/attendance/stats/student/{student_id}/course/{course_id})
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Parámetros de consulta opcionales:**
+- `date_from`: Filtrar por fecha (desde)
+- `date_to`: Filtrar por fecha (hasta)
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "total_classes": 20,
+  "present_count": 18,
+  "absent_count": 1,
+  "late_count": 1,
+  "excused_count": 0,
+  "attendance_rate": 90.0
+}
+```
+
+## 6. Gestión de Tutores
+
+### 6.1. Asignar Tutor a Estudiante (/api/v1/tutors/)
+
+> **Importante**: Este endpoint solo puede ser utilizado por administradores.
+
+**Método**: POST
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Request:**
+```json
+{
+  "student_id": 1,
+  "user_id": 5,
+  "relationship": "parent",
+  "notes": "Madre del estudiante"
+}
+```
+
+**Valores permitidos para relationship:**
+- `tutor`: Tutor académico
+- `parent`: Padre/madre
+- `partner`: Apoderado
+- `other`: Otro tipo de relación
+
+**Response Exitosa (201 Created):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "user_id": 5,
+  "relationship": "parent",
+  "notes": "Madre del estudiante"
+}
+```
+
+**Response Error (404 Not Found):**
+```json
+{
+  "detail": "Estudiante no encontrado"
+}
+```
+
+**Response Error (400 Bad Request):**
+```json
+{
+  "detail": "Ya existe una relación tutor-estudiante con estos datos"
+}
+```
+
+### 6.2. Obtener Tutores de un Estudiante (/api/v1/tutors/student/{student_id})
+
+> **Importante**: Este endpoint requiere autenticación. Pueden acceder: administradores, profesores del estudiante, tutores del estudiante o el propio estudiante.
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "student_id": 1,
+    "user_id": 5,
+    "relationship": "parent",
+    "notes": "Madre del estudiante",
+    "student_name": "Juan Pérez",
+    "tutor_name": "María Pérez",
+    "tutor_email": "maria@example.com",
+    "tutor_phone": "1234567890"
+  },
+  {
+    "id": 2,
+    "student_id": 1,
+    "user_id": 6,
+    "relationship": "parent",
+    "notes": "Padre del estudiante",
+    "student_name": "Juan Pérez",
+    "tutor_name": "Carlos Pérez",
+    "tutor_email": "carlos@example.com",
+    "tutor_phone": "0987654321"
+  }
+]
+```
+
+**Response Error (404 Not Found):**
+```json
+{
+  "detail": "Estudiante no encontrado"
+}
+```
+
+**Response Error (403 Forbidden):**
+```json
+{
+  "detail": "No tienes permiso para ver los tutores de este estudiante"
+}
+```
+
+### 6.3. Obtener Estudiantes Asignados a un Tutor (/api/v1/tutors/user/{user_id})
+
+> **Importante**: Este endpoint requiere autenticación. Solo pueden acceder: el propio usuario o administradores.
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "student_id": 1,
+    "user_id": 5,
+    "relationship": "parent",
+    "notes": "Madre del estudiante",
+    "student_name": "Juan Pérez",
+    "tutor_name": "María Pérez",
+    "tutor_email": "maria@example.com",
+    "tutor_phone": "1234567890"
+  },
+  {
+    "id": 3,
+    "student_id": 2,
+    "user_id": 5,
+    "relationship": "parent",
+    "notes": "Madre del estudiante",
+    "student_name": "Ana Pérez",
+    "tutor_name": "María Pérez",
+    "tutor_email": "maria@example.com",
+    "tutor_phone": "1234567890"
+  }
+]
+```
+
+**Response Error (403 Forbidden):**
+```json
+{
+  "detail": "No tienes permiso para ver esta información"
+}
+```
+
+### 6.4. Obtener Detalle de Relación Tutor-Estudiante (/api/v1/tutors/{tutor_id})
+
+> **Importante**: Este endpoint requiere autenticación. Pueden acceder: administradores, profesores del estudiante, el tutor o el propio estudiante.
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "user_id": 5,
+  "relationship": "parent",
+  "notes": "Madre del estudiante",
+  "student_name": "Juan Pérez",
+  "tutor_name": "María Pérez",
+  "tutor_email": "maria@example.com",
+  "tutor_phone": "1234567890"
+}
+```
+
+**Response Error (404 Not Found):**
+```json
+{
+  "detail": "Relación tutor-estudiante no encontrada"
+}
+```
+
+**Response Error (403 Forbidden):**
+```json
+{
+  "detail": "No tienes permiso para ver esta relación tutor-estudiante"
+}
+```
+
+### 6.5. Actualizar Relación Tutor-Estudiante (/api/v1/tutors/{tutor_id})
+
+> **Importante**: Este endpoint solo puede ser utilizado por administradores.
+
+**Método**: PUT
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Request:**
+```json
+{
+  "relationship": "tutor",
+  "notes": "Tutor académico asignado"
+}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "user_id": 5,
+  "relationship": "tutor",
+  "notes": "Tutor académico asignado"
+}
+```
+
+**Response Error (404 Not Found):**
+```json
+{
+  "detail": "Relación tutor-estudiante no encontrada"
+}
+```
+
+### 6.6. Eliminar Relación Tutor-Estudiante (/api/v1/tutors/{tutor_id})
+
+> **Importante**: Este endpoint solo puede ser utilizado por administradores.
+
+**Método**: DELETE
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "message": "Relación tutor-estudiante eliminada correctamente"
+}
+```
+
+**Response Error (404 Not Found):**
+```json
+{
+  "detail": "Relación tutor-estudiante no encontrada"
+}
+```

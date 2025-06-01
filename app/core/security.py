@@ -74,3 +74,23 @@ async def get_current_active_superuser(current_user: User = Depends(get_current_
             detail="No tienes permisos suficientes"
         )
     return current_user
+
+async def get_current_active_teacher(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    # Verificar primero si el usuario es superusuario (admin)
+    if current_user.is_superuser:
+        return current_user
+    
+    # Si no es superusuario, verificar si es profesor
+    result = db.execute(
+        """SELECT t.id FROM teachers t WHERE t.user_id = :user_id""",
+        {"user_id": current_user.id}
+    )
+    teacher = result.first()
+    
+    if not teacher:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="El usuario no es un profesor",
+        )
+    
+    return current_user
