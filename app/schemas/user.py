@@ -36,8 +36,9 @@ class UserUpdate(BaseModel):
     direction: Optional[str] = None
     birth_date: Optional[str] = None
     gender: Optional[GenderEnum] = None
-    photo: Optional[str] = None
+    photo: Optional[str] = None  # Puede ser una URL como string
     is_active: Optional[bool] = None
+    role: Optional[RoleEnum] = None  # Añadido campo role
 
 class UserResponse(UserBase):
     id: int

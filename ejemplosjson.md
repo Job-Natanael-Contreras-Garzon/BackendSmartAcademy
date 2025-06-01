@@ -185,3 +185,200 @@ Authorization: Bearer {access_token}
 - Los enums como `gender` y `role` se almacenan en minúsculas en la base de datos
 - Si envías valores en mayúsculas ("MALE", "FEMALE", "ADMINISTRATOR"), serán convertidos automáticamente
 - Si no estás seguro del formato, siempre usa los valores en minúsculas como se indica en la documentación
+
+## 3. Gestión de Usuarios
+
+### 3.1. Crear Usuario (/api/v1/users/)
+
+> **Importante**: Este endpoint requiere autenticación como superusuario.
+
+**Método**: POST
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Request:**
+```json
+{
+  "email": "profesor@smartacademy.com",
+  "password": "password123",
+  "full_name": "Profesor Ejemplo",
+  "phone": "9876543210",
+  "direction": "Calle Secundaria 456",
+  "birth_date": "1985-05-15",
+  "gender": "male",
+  "role": "teacher",
+  "is_superuser": false
+}
+```
+
+**Response Exitosa (201 Created):**
+```json
+{
+  "id": 3,
+  "email": "profesor@smartacademy.com",
+  "full_name": "Profesor Ejemplo",
+  "phone": "9876543210",
+  "direction": "Calle Secundaria 456",
+  "birth_date": "1985-05-15",
+  "gender": "male",
+  "role": "teacher",
+  "photo": null,
+  "is_active": true,
+  "is_superuser": false
+}
+```
+
+### 3.2. Listar Usuarios (/api/v1/users/)
+
+> **Importante**: Este endpoint requiere autenticación como superusuario.
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Parámetros de consulta opcionales:**
+- `skip`: Número de registros a omitir (paginación)
+- `limit`: Número máximo de registros a devolver
+
+**Response Exitosa (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "email": "admin@smartacademy.com",
+    "full_name": "Administrador",
+    "phone": "1234567890",
+    "direction": "Calle Principal 123",
+    "birth_date": "1990-01-01",
+    "gender": "male",
+    "role": "administrator",
+    "photo": null,
+    "is_active": true,
+    "is_superuser": true
+  },
+  {
+    "id": 3,
+    "email": "profesor@smartacademy.com",
+    "full_name": "Profesor Ejemplo",
+    "phone": "9876543210",
+    "direction": "Calle Secundaria 456",
+    "birth_date": "1985-05-15",
+    "gender": "male",
+    "role": "teacher",
+    "photo": null,
+    "is_active": true,
+    "is_superuser": false
+  }
+]
+```
+
+### 3.3. Obtener Usuario por ID (/api/v1/users/{user_id})
+
+**Método**: GET
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Notas**: Un usuario regular solo puede ver su propio perfil. Los administradores pueden ver cualquier perfil.
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "id": 3,
+  "email": "profesor@smartacademy.com",
+  "full_name": "Profesor Ejemplo",
+  "phone": "9876543210",
+  "direction": "Calle Secundaria 456",
+  "birth_date": "1985-05-15",
+  "gender": "male",
+  "role": "teacher",
+  "photo": null,
+  "is_active": true,
+  "is_superuser": false
+}
+```
+
+### 3.4. Actualizar Usuario (/api/v1/users/{user_id})
+
+**Método**: PUT
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Notas**: Un usuario regular solo puede actualizar su propio perfil. Los administradores pueden actualizar cualquier perfil.
+
+**Request:**
+```json
+{
+  "full_name": "Profesor Ejemplo Actualizado",
+  "phone": "9876543210",
+  "direction": "Nueva Dirección 789",
+  "birth_date": "1985-05-15",
+  "gender": "male",
+  "photo": "https://ejemplo.com/foto-profesor.jpg"
+}
+```
+
+**Request (solo administradores, con campos adicionales):**
+```json
+{
+  "full_name": "Profesor Ejemplo Actualizado",
+  "phone": "9876543210",
+  "direction": "Nueva Dirección 789",
+  "birth_date": "1985-05-15",
+  "gender": "male",
+  "photo": "https://ejemplo.com/foto-profesor.jpg",
+  "role": "teacher",
+  "is_active": true
+}
+```
+
+> **Importante**: 
+> - Asegúrate de que el JSON sea válido. No incluyas una coma después del último elemento del objeto JSON.
+> - El campo `photo` acepta una URL como string.
+> - Solo los administradores pueden actualizar los campos `role` e `is_active`.
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "id": 3,
+  "email": "profesor@smartacademy.com",
+  "full_name": "Profesor Ejemplo Actualizado",
+  "phone": "9876543210",
+  "direction": "Nueva Dirección 789",
+  "birth_date": "1985-05-15",
+  "gender": "male",
+  "role": "teacher",
+  "photo": null,
+  "is_active": true,
+  "is_superuser": false
+}
+```
+
+### 3.5. Eliminar Usuario (/api/v1/users/{user_id})
+
+> **Importante**: Este endpoint requiere autenticación como superusuario.
+
+**Método**: DELETE
+
+**Headers:**
+```
+Authorization: Bearer {access_token}
+```
+
+**Response Exitosa (200 OK):**
+```json
+{
+  "message": "Usuario eliminado correctamente"
+}
+```
