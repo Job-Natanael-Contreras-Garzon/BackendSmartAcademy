@@ -1,0 +1,28 @@
+# Core
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+
+# Autenticación y seguridad
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+
+# Base de datos
+sqlalchemy==2.0.37
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# Variables de entorno
+python-dotenv==1.0.1
+
+# Validación de datos
+pydantic[email]==2.6.4
+pydantic-settings==2.2.1
+
+# Machine Learning y procesamiento de datos
+scikit-learn==1.4.1.post1
+pandas==2.2.1
+numpy==1.26.4
+
+# Utilidades
+python-dateutil==2.9.0.post0
