@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, Field
 from typing import List, Optional
 
 class Settings(BaseSettings):
@@ -12,12 +12,15 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
     DATABASE_URI: Optional[str] = None
+    DATABASE_URL: Optional[str] = Field(None, env="DATABASE_URL")
 
     class Config:
         env_file = ".env"
         case_sensitive = True
 
     def get_database_url(self) -> str:
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
         if self.DATABASE_URI:
             return self.DATABASE_URI
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"

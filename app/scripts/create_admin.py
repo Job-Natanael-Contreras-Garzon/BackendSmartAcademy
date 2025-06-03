@@ -12,9 +12,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.security import get_password_hash
 from app.models.user import RoleEnum
+from app.core.config import settings
 
 # Conectar directamente a la base de datos usando la configuración del proyecto
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:job123@localhost:5432/SmartDB"
+SQLALCHEMY_DATABASE_URL = settings.get_database_url()
+
+# SQLAlchemy expects postgresql:// but many providers use postgres://
+# This is a fix for that issue
+if SQLALCHEMY_DATABASE_URL.startswith('postgres://'):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -22,6 +29,31 @@ def create_admin():
     """Crea un usuario administrador directamente en la base de datos"""
     db = SessionLocal()
     try:
+        # Primero, verificar qué valores de enum están permitidos en la base de datos
+        logger.info("Verificando valores de enum permitidos...")
+        enum_query = text("""
+        SELECT enumlabel FROM pg_enum 
+        JOIN pg_type ON pg_enum.enumtypid = pg_type.oid 
+        WHERE pg_type.typname = 'roleenum';
+        """)
+        enum_result = db.execute(enum_query)
+        enum_values = [row[0] for row in enum_result]
+        logger.info(f"Valores de enum permitidos: {enum_values}")
+        
+        # Determinar el valor correcto para el administrador
+        admin_role = RoleEnum.ADMINISTRATOR.value
+        if admin_role not in enum_values and enum_values:
+            # Intenta encontrar un valor similar
+            for value in enum_values:
+                if "admin" in value.lower():
+                    admin_role = value
+                    break
+            if admin_role not in enum_values:
+                # Si no se encuentra ningún valor adecuado, usa el primero disponible
+                admin_role = enum_values[0] if enum_values else admin_role
+        
+        logger.info(f"Usando el valor de rol: {admin_role}")
+        
         # Verificar si existe el usuario
         logger.info("Verificando si existe un administrador...")
         result = db.execute(text("SELECT * FROM users WHERE is_superuser = TRUE"))
@@ -41,7 +73,7 @@ def create_admin():
                     "full_name": "Administrador",
                     "is_active": True,
                     "is_superuser": True,
-                    "role": RoleEnum.ADMINISTRATOR.value
+                    "role": admin_role
                 }
             )
             db.commit()
