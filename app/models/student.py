@@ -11,7 +11,7 @@ class Student(Base):
     email = Column(String(100), unique=True, index=True)
     date_of_birth = Column(Date)
     address = Column(String(200))
-    phone = Column(String(20))
+    phone = Column(String(50))  # Increased length from 20 to 50
     
     # Relaciones
     grades = relationship("Grade", back_populates="student")

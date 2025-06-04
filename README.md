@@ -1,11 +1,12 @@
 # Smart Academy Backend
 
-Backend para el sistema de gestión académica con predicción de rendimiento.
+Backend para el sistema de gestión académica con predicción de rendimiento utilizando machine learning y análisis de datos.
 
 ## Requisitos
 
 - Python 3.7+
 - PostgreSQL
+- Librerías: scikit-learn, pandas, numpy, joblib
 
 ## Instalación
 
@@ -14,9 +15,22 @@ Backend para el sistema de gestión académica con predicción de rendimiento.
 3. Activa el entorno virtual:
    - Windows: `venv\Scripts\activate`
 4. Instala las dependencias: `pip install -r requirements.txt`
-5. Crea un archivo [.env](cci:7://file:///c:/Users/contr/Documents/Repositorios%20de%20Git/BackendSmartAcademy/.env:0:0-0:0) con las variables de entorno necesarias
+5. Crea un archivo `.env` con las variables de entorno necesarias
 6. Ejecuta las migraciones: `alembic upgrade head`
 7. Inicia el servidor: `uvicorn app.main:app --reload`
+
+## Población de datos de prueba
+
+1. Con el entorno virtual activado, ejecuta:
+   ```
+   python -m app.scripts.populate_db
+   ```
+2. Este script poblará la base de datos con:
+   - Usuarios (profesores y estudiantes)
+   - Cursos
+   - Calificaciones con tendencias temporales
+   - Registros de asistencia
+   - Participaciones en clase
 
 ## Documentación
 
@@ -49,18 +63,30 @@ A continuación, te presento un plan estructurado para implementar los casos de 
 * CU13: Gestión de autenticación y seguridad (web/mobile)
 	+ Descripción: Sistema de login, registro y gestión de tokens JWT.
 	+ Endpoints:
-		- POST /api/v1/auth/token - Login y obtención de token
-		- GET /api/v1/auth/users/me - Obtener usuario actual
+		- POST /api/v1/auth/login - Login y obtención de token.
+			+ Permisos: Abierto.
+		- POST /api/v1/auth/register-admin - Registrar un nuevo usuario administrador.
+			+ Permisos: Solo Superusuarios autenticados.
+		- GET /api/v1/auth/users/me - Obtener el perfil del usuario actualmente autenticado.
+			+ Permisos: Cualquier usuario autenticado.
+		- POST /api/v1/auth/change-password - Cambiar la contraseña del usuario actualmente autenticado.
+			+ Permisos: Cualquier usuario autenticado.
 	+ Funcionalidades móvil: Login con persistencia de sesión, refresh token
 	+ Funcionalidades web: Además de lo anterior, gestión de sesiones y cierre de sesión global
 	+ Valores de atributos: N/A
 * CU1: Gestión de usuarios (web/mobile)
 	+ Descripción: CRUD de usuarios con roles definidos.
 	+ Endpoints:
-		- POST /api/v1/users/ - Crear usuario
-		- GET /api/v1/users/ - Listar usuarios (admin)
-		- GET /api/v1/users/{user_id} - Obtener usuario por ID
-		- PUT /api/v1/users/{user_id} - Actualizar usuario
+		- POST /api/v1/users/ - Crear un nuevo usuario (profesor, estudiante, padre).
+			+ Permisos: Solo Superusuarios.
+		- GET /api/v1/users/ - Listar todos los usuarios.
+			+ Permisos: Solo Superusuarios.
+		- GET /api/v1/users/{user_id} - Obtener un usuario específico por su ID.
+			+ Permisos: Superusuarios pueden ver cualquier usuario. Usuarios regulares solo pueden ver su propio perfil (si `user_id` coincide con el del token).
+		- PUT /api/v1/users/{user_id} - Actualizar un usuario específico por su ID.
+			+ Permisos: Superusuarios pueden actualizar cualquier usuario. Usuarios regulares solo pueden actualizar su propio perfil.
+		- DELETE /api/v1/users/{user_id} - Eliminar un usuario específico por su ID.
+			+ Permisos: Solo Superusuarios.
 	+ Funcionalidades móvil: Registro, visualización y edición de perfil básico
 	+ Funcionalidades web: Todo lo anterior más gestión completa de usuarios (admin)
 	+ Valores de atributos:
@@ -69,10 +95,22 @@ A continuación, te presento un plan estructurado para implementar los casos de 
 * CU2: Gestionar roles y permisos (web/mobile)
 	+ Descripción: Sistema para asignar roles y permisos a usuarios.
 	+ Endpoints:
-		- GET /api/v1/roles/ - Listar roles
-		- POST /api/v1/roles/ - Crear rol (admin)
-		- PUT /api/v1/roles/{role_id} - Actualizar rol
-		- POST /api/v1/users/{user_id}/roles - Asignar rol a usuario
+		- POST /api/v1/roles/ - Crear un nuevo rol.
+			+ Permisos: Solo Administradores.
+		- GET /api/v1/roles/ - Listar todos los roles disponibles.
+			+ Permisos: Cualquier usuario autenticado.
+		- GET /api/v1/roles/{role_id} - Obtener un rol específico por su ID.
+			+ Permisos: Cualquier usuario autenticado.
+		- PUT /api/v1/roles/{role_id} - Actualizar un rol existente.
+			+ Permisos: Solo Administradores.
+		- DELETE /api/v1/roles/{role_id} - Eliminar un rol existente.
+			+ Permisos: Solo Administradores.
+		- POST /api/v1/roles/{role_id}/assign_to_user/{user_id} - Asignar un rol específico a un usuario específico.
+			+ Permisos: Solo Administradores.
+		- POST /api/v1/roles/{role_id}/remove_from_user/{user_id} - Remover un rol específico de un usuario específico.
+			+ Permisos: Solo Administradores.
+		- GET /api/v1/users/{user_id}/roles - Obtener los roles asignados a un usuario específico. (Este endpoint reside en el módulo de Usuarios pero es relevante para la gestión de roles).
+			+ Permisos: Cualquier usuario autenticado.
 	+ Funcionalidades móvil: Visualización de roles propios
 	+ Funcionalidades web: Gestión completa de roles y permisos
 	+ Valores de atributos: Permisos específicos según rol
@@ -85,14 +123,30 @@ A continuación, te presento un plan estructurado para implementar los casos de 
 		- PUT /api/v1/periods/{period_id} - Actualizar periodo
 	+ Funcionalidades web: Creación y configuración de periodos académicos
 	+ Valores de atributos: name - Nombre descriptivo del periodo
-* CU3: Gestión de grupos escolares (web/mobile)
-	+ Descripción: CRUD de grupos escolares y asignación de estudiantes.
+* CU3: Gestión de Cursos (web/mobile)
+	+ Descripción: CRUD de cursos, asignación de profesores y gestión de estudiantes inscritos.
 	+ Endpoints:
-		- POST /api/v1/groups/ - Crear grupo
-		- GET /api/v1/groups/ - Listar grupos
-		- POST /api/v1/groups/{group_id}/students - Asignar estudiantes
-	+ Funcionalidades móvil: Visualización de grupos asignados
-	+ Funcionalidades web: Gestión completa de grupos y asignaciones
+		- POST /api/v1/courses/ - Crear un nuevo curso (incluye asignación de profesor).
+			+ Permisos: Solo Administradores.
+		- GET /api/v1/courses/ - Listar todos los cursos (permite filtros por profesor_id, estudiante_id).
+			+ Permisos: Cualquier usuario autenticado.
+		- GET /api/v1/courses/{course_id} - Obtener un curso específico por su ID.
+			+ Permisos: Cualquier usuario autenticado.
+		- PUT /api/v1/courses/{course_id} - Actualizar un curso existente (incluye cambio de profesor).
+			+ Permisos: Solo Administradores.
+		- DELETE /api/v1/courses/{course_id} - Eliminar un curso.
+			+ Permisos: Solo Administradores.
+		- POST /api/v1/courses/{course_id}/students - Inscribir estudiantes en un curso.
+			+ Permisos: Solo Administradores.
+			+ **Estado: Pendiente de Implementación.**
+		- DELETE /api/v1/courses/{course_id}/students/{student_id} - Remover un estudiante de un curso.
+			+ Permisos: Solo Administradores.
+			+ **Estado: Pendiente de Implementación.**
+		- GET /api/v1/courses/{course_id}/students - Listar estudiantes inscritos en un curso.
+			+ Permisos: Profesores del curso, Administradores.
+			+ **Estado: Pendiente de Implementación.**
+	+ Funcionalidades móvil: Visualización de cursos asignados/inscritos.
+	+ Funcionalidades web: Gestión completa de cursos, profesores y estudiantes en cursos.
 	+ Valores de atributos:
 		- grade: ["1ro", "2do", "3ro", "4to", "5to", "6to", "kinder", "preescolar"]
 		- level: ["initial", "primary", "secondary"]
@@ -172,3 +226,40 @@ A continuación, te presento un plan estructurado para implementar los casos de 
 
 Consideraciones técnicas
 Interfaz web vs. móvil:
+
+## Sistema de Predicción y Análisis
+
+El backend incorpora un avanzado sistema de predicción y análisis del rendimiento académico:
+
+### Características del Sistema ML
+
+- **Extracción de características avanzada**: Análisis de tendencias temporales en calificaciones, asistencia y participación
+- **Modelos soportados**: Random Forest, Gradient Boosting, Linear Regression
+- **Análisis de riesgo**: Identificación de factores de riesgo específicos para cada estudiante
+- **Recomendaciones personalizadas**: Sugerencias automáticas basadas en los patrones detectados
+- **Persistencia de modelos**: Almacenamiento de modelos entrenados con versionado temporal
+- **Historiales de predicción**: Registro de todas las predicciones para análisis posteriores
+
+### Endpoints de Predicción
+
+- `POST /api/v1/predictions/train`: Entrena un nuevo modelo con los datos disponibles
+  - Parámetros: `model_type` (random_forest, gradient_boosting, linear_regression), `advanced` (boolean)
+- `GET /api/v1/predictions/student/{student_id}`: Predice el rendimiento de un estudiante
+  - Parámetros opcionales: `course_id` (int), `advanced` (boolean)
+- `GET /api/v1/predictions/dashboard/stats`: Estadísticas agregadas de predicciones para dashboard
+- `GET /api/v1/predictions/at-risk`: Lista de estudiantes en riesgo por nivel
+  - Parámetros: `risk_level` (Alto, Medio, Bajo), `limit` (int)
+
+### Script de Análisis
+
+El proyecto incluye un script `app/scripts/analyze_predictions.py` para ejecutar análisis detallados:
+
+```
+python -m app.scripts.analyze_predictions
+```
+
+Este script:
+1. Entrena automáticamente el modelo avanzado
+2. Ejecuta predicciones para un conjunto de estudiantes
+3. Genera visualizaciones y estadísticas de los resultados
+4. Guarda un reporte detallado de las predicciones

@@ -4,7 +4,7 @@ from datetime import datetime
 import enum
 from sqlalchemy import Enum
 
-from app.db.base_class import Base
+from app.db.base import Base
 
 
 class NotificationType(str, enum.Enum):
