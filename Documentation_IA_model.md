@@ -6,26 +6,48 @@
 Este documento proporciona una descripción técnica detallada del sistema Smart Academy, con un enfoque especial en el modelo de Inteligencia Artificial (IA) implementado para la predicción del rendimiento académico de los estudiantes. Su objetivo es servir como referencia para desarrolladores, administradores del sistema, analistas de datos y otras partes interesadas que necesiten comprender la arquitectura, el funcionamiento interno, los componentes de IA del sistema, y los detalles operativos del modelo.
 
 ### 1.2. Visión General del Sistema Smart Academy
-Smart Academy es una plataforma de gestión académica diseñada para [Describir brevemente el propósito principal de Smart Academy, ej: optimizar la administración educativa, mejorar la experiencia de aprendizaje, etc.]. El sistema integra diversas funcionalidades, incluyendo gestión de usuarios, cursos, calificaciones, y un módulo de IA que ofrece predicciones sobre el desempeño estudiantil para facilitar intervenciones tempranas y personalizadas. Este módulo de IA utiliza datos históricos y simulados (descritos en `Dataset_utilizado.md`) para generar dichas predicciones.
+Smart Academy es una plataforma de gestión académica integral diseñada para optimizar la administración educativa y enriquecer la experiencia de aprendizaje. Su propósito es proporcionar a educadores, estudiantes y administradores las herramientas necesarias para un seguimiento detallado del progreso académico y para la toma de decisiones informadas. El sistema facilita la gestión de perfiles de usuario (con roles definidos como administrador, superusuario, profesor, estudiante y padre), la organización de cursos y asignaturas, y el registro de calificaciones y asistencia. Un componente central es su módulo de Inteligencia Artificial, que analiza datos históricos y actuales (incluyendo datos simulados con tendencias realistas generados por `app/scripts/populate_db.py` y descritos en `Dataset_utilizado.md`) para ofrecer predicciones sobre el desempeño estudiantil. Estas predicciones están diseñadas para permitir intervenciones tempranas y personalizadas, ayudando a identificar estudiantes que podrían necesitar apoyo adicional y a adaptar las estrategias pedagógicas.
 
 ## 2. Arquitectura del Sistema
 
 ### 2.1. Componentes Principales
-El sistema Smart Academy se compone de los siguientes elementos clave:
--   **Backend (API):** Desarrollado en FastAPI (Python), maneja la lógica de negocio, la gestión de datos y la comunicación con la base de datos y los clientes (frontend, aplicaciones móviles, etc.).
--   **Base de Datos:** Se utiliza PostgreSQL para el almacenamiento persistente de todos los datos de la aplicación, incluyendo perfiles de usuario, información académica, y datos relevantes para el modelo de IA.
--   **Modelo de IA:** Un componente integrado dentro del backend que procesa datos históricos y actuales para generar predicciones. Su lógica reside en servicios específicos y utiliza modelos entrenados.
+El sistema Smart Academy se articula en torno a tres componentes fundamentales que interactúan para ofrecer una solución robusta y escalable:
+-   **Backend (API):** Construido con FastAPI en Python, este componente es el cerebro del sistema. Expone un conjunto de APIs RESTful que gestionan toda la lógica de negocio, incluyendo la autenticación y autorización de usuarios basada en roles, la administración de entidades académicas (estudiantes, cursos, calificaciones, asistencia, participación), y la interacción con la base de datos. Crucialmente, el backend también orquesta las operaciones del modelo de IA, desde la recopilación y preprocesamiento de datos para inferencias hasta la entrega de predicciones a los sistemas cliente (como un frontend web o aplicaciones móviles).
+-   **Base de Datos (PostgreSQL):** PostgreSQL sirve como el sistema de gestión de base de datos relacional, proporcionando almacenamiento persistente, seguro y eficiente para todos los datos de la aplicación. Esto incluye perfiles de usuario detallados, registros académicos históricos y actuales, y cualquier metadato o configuración del sistema. La integridad y disponibilidad de estos datos son vitales, ya que constituyen la materia prima tanto para las operaciones diarias del sistema como para el entrenamiento y la inferencia del modelo de IA.
+-   **Modelo de IA (Servicio de ML):** Más que un simple componente, el modelo de IA (y su lógica circundante, encapsulada en `app/services/ml_service.py`) funciona como un servicio especializado dentro del ecosistema del backend. Es responsable de cargar modelos de predicción previamente entrenados, procesar los datos de entrada necesarios (extraídos de la base de datos a través del backend), realizar inferencias (predicciones) y devolver estos resultados. Su diseño permite que sea actualizado o reentrenado independientemente de la lógica de negocio principal, asegurando flexibilidad y mantenibilidad.
 
 ### 2.2. Tecnologías Utilizadas
--   **Lenguaje de Programación (Backend):** Python 3.x
--   **Framework Backend:** FastAPI
--   **Base de Datos:** PostgreSQL
--   **Autenticación:** Tokens JWT (JSON Web Tokens) y sistema de roles (administrador, superusuario, profesor, estudiante, padre).
--   **Librerías de IA:** [Especificar librerías, ej: Scikit-learn, TensorFlow, PyTorch, Pandas, NumPy]
--   **Servidor Web (para FastAPI):** Uvicorn con Gunicorn (o similar)
+La selección tecnológica busca un equilibrio entre rendimiento, robustez, y un ecosistema de desarrollo maduro, especialmente para las capacidades de IA:
+-   **Lenguaje de Programación (Backend):** Python 3.x, elegido por su amplia adopción en el desarrollo web y científico, su sintaxis clara y la vasta cantidad de librerías disponibles, especialmente para Machine Learning.
+-   **Framework Backend:** FastAPI, seleccionado por su alto rendimiento (comparable a NodeJS y Go), su moderna sintaxis basada en type hints de Python que facilita la validación automática de datos y la generación de documentación OpenAPI, y su facilidad para construir APIs robustas.
+-   **Base de Datos:** PostgreSQL, un potente sistema de gestión de bases de datos relacionales de código abierto, conocido por su fiabilidad, robustez de características y extensibilidad.
+-   **Autenticación:** Tokens JWT (JSON Web Tokens) para la gestión de sesiones seguras y stateless, complementado con un sistema de roles (administrador, superusuario, profesor, estudiante, padre) para un control de acceso granular a las funcionalidades y datos del sistema.
+-   **Librerías de IA:** La elección específica dependerá de los algoritmos implementados, pero comúnmente incluirá Pandas para manipulación de datos, NumPy para operaciones numéricas, Scikit-learn para algoritmos de ML clásicos y métricas de evaluación. Para modelos más complejos como redes neuronales, se podrían utilizar TensorFlow o PyTorch. [Especificar librerías concretas una vez definidas].
+-   **Servidor Web (para FastAPI):** Uvicorn como servidor ASGI de alto rendimiento, frecuentemente desplegado detrás de un servidor de procesos como Gunicorn en entornos de producción para gestionar workers y mejorar la concurrencia.
 
 ### 2.3. Flujo de Datos General
-[Describir brevemente o insertar un diagrama simple del flujo de datos. Ej: Cliente -> API (FastAPI) -> Lógica de Negocio / Modelo de IA -> Base de Datos (PostgreSQL) -> API -> Cliente. Detallar cómo el modelo de IA interactúa con la base de datos para obtener features y cómo se exponen las predicciones a través de la API.]
+El flujo de datos en Smart Academy está diseñado para asegurar la coherencia y facilitar tanto las operaciones transaccionales como las analíticas del modelo de IA.
+
+**Flujo Operacional y de Captura de Datos:**
+1.  **Interacción del Usuario:** Los usuarios (estudiantes, profesores, administradores) interactúan con el sistema a través de una interfaz cliente (ej. una aplicación web o móvil).
+2.  **Solicitud a la API:** Las acciones del usuario (ej. registrar una calificación, marcar asistencia, consultar información) se traducen en solicitudes HTTP a los endpoints correspondientes de la API FastAPI.
+3.  **Procesamiento en el Backend:** El backend valida la solicitud (incluyendo autenticación y autorización), ejecuta la lógica de negocio pertinente y, si es necesario, interactúa con la base de datos PostgreSQL para crear, leer, actualizar o eliminar registros (operaciones CRUD).
+4.  **Respuesta al Cliente:** El backend envía una respuesta HTTP al cliente, confirmando la operación o devolviendo los datos solicitados.
+
+**Flujo de Datos para Predicciones del Modelo de IA:**
+1.  **Solicitud de Predicción:** Un cliente (o un proceso interno programado) solicita una predicción a un endpoint específico de la API, por ejemplo, `/api/v1/students/{student_id}/predict_performance`.
+2.  **Orquestación por el Backend:** La API FastAPI recibe la solicitud y la dirige al servicio de ML (`app/services/ml_service.py`).
+3.  **Recopilación de Features:** El servicio de ML consulta la base de datos PostgreSQL para obtener los datos históricos y actuales necesarios del estudiante (y potencialmente de su contexto) que servirán como features para el modelo. Esto puede implicar la recuperación de calificaciones, asistencia, participación, etc.
+4.  **Preprocesamiento de Datos:** Los datos recuperados se someten a las etapas de preprocesamiento definidas (limpieza, transformación, ingeniería de características) para adecuarlos al formato esperado por el modelo entrenado.
+5.  **Inferencia del Modelo:** Las features preprocesadas se pasan al modelo de IA cargado en memoria.
+6.  **Generación de Predicción:** El modelo procesa las features y genera una predicción (ej. una calificación esperada, una categoría de riesgo).
+7.  **Respuesta de la API:** El servicio de ML devuelve la predicción al endpoint de la API, que la formatea (generalmente como JSON) y la envía como respuesta al cliente.
+
+**Flujo de Datos para Entrenamiento/Reentrenamiento del Modelo de IA (Periódico/Bajo Demanda):**
+1.  **Extracción de Datos:** Se extrae un conjunto de datos relevante de la base de datos PostgreSQL. Para el entrenamiento inicial o para aumentar el dataset, se pueden utilizar los datos generados por `app/scripts/populate_db.py`.
+2.  **Preprocesamiento y Entrenamiento:** Este dataset se preprocesa y se utiliza para entrenar (o reentrenar) el modelo de IA utilizando las librerías y algoritmos seleccionados.
+3.  **Evaluación y Versionado:** El modelo resultante se evalúa rigurosamente. Si cumple con los criterios de calidad, se versiona y se guarda como un artefacto (ej. un archivo `.pkl` o `.h5`).
+4.  **Despliegue del Modelo:** El nuevo modelo entrenado se despliega, lo que puede implicar reemplazar el modelo anterior en el servicio de ML para que las futuras solicitudes de predicción utilicen la versión actualizada.
 
 ## 3. Modelo de Inteligencia Artificial: Predicción de Rendimiento Académico
 
@@ -44,7 +66,11 @@ Estas predicciones están diseñadas para ayudar a educadores y administradores 
 ### 3.3. Datos Utilizados
 
 #### 3.3.1. Fuentes de Datos
-El modelo se entrena y opera utilizando el dataset simulado descrito en `Dataset_utilizado.md`. Este dataset incluye información detallada sobre:
+El modelo de IA se nutre fundamentalmente de los datos almacenados en la base de datos PostgreSQL del sistema. Para el desarrollo inicial, entrenamiento y pruebas exhaustivas, se utiliza un dataset simulado generado por el script `app/scripts/populate_db.py`, cuya estructura y características se detallan en `Dataset_utilizado.md`. Este script está diseñado para crear datos realistas que incluyen tendencias temporales y variaciones individuales, esenciales para entrenar un modelo predictivo robusto.
+
+En un entorno de producción, el modelo se entrenaría y operaría principalmente con los datos operativos reales generados por la actividad diaria en la plataforma Smart Academy. El dataset simulado sigue siendo valioso para escenarios de prueba, benchmarking y para complementar datos reales si fuera necesario (con las debidas precauciones para evitar sesgos).
+
+Las entidades principales que proporcionan datos para el modelo incluyen:
 -   Usuarios (estudiantes, profesores)
 -   Cursos y Asignaturas
 -   Periodos Académicos
