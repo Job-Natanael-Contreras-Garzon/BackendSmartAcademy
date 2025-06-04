@@ -197,7 +197,12 @@ El modelo de IA es accesible a través de los siguientes endpoints de la API:
 ### 4.3. Interpretación y Uso Responsable de las Predicciones
 -   Las predicciones deben ser utilizadas como una herramienta de apoyo para la toma de decisiones por parte de educadores y personal cualificado, y no como el único factor determinante para acciones críticas (ej: asignación de recursos, intervenciones disciplinarias).
 -   Es crucial que los usuarios finales (profesores, administradores) reciban capacitación sobre cómo interpretar las predicciones, comprendiendo su naturaleza probabilística y sus limitaciones.
--   **Explicabilidad del Modelo (XAI):** [Considerar y describir si se han implementado o se planean implementar técnicas para explicar las predicciones del modelo (ej: SHAP, LIME) para aumentar la transparencia y la confianza].
+-   **Explicabilidad del Modelo (XAI):** Para fomentar la transparencia, la confianza y la adopción efectiva del modelo de IA, se planea la integración de técnicas de Explicabilidad del Modelo (XAI). Métodos como SHAP (SHapley Additive exPlanations) o LIME (Local Interpretable Model-agnostic Explanations) son candidatos idóneos. Estas técnicas pueden desglosar las predicciones individuales para mostrar qué factores o características (por ejemplo, un descenso reciente en las calificaciones de matemáticas, una baja asistencia en el último mes, o una alta participación en foros) contribuyeron más significativamente a la predicción de rendimiento de un estudiante específico. Proporcionar estas explicaciones junto con las predicciones permitiría a los educadores:
+    -   Comprender la lógica detrás de las sugerencias del sistema.
+    -   Validar si las predicciones se alinean con su propio conocimiento del estudiante.
+    -   Comunicar de manera más efectiva las bases de una intervención al estudiante o a sus padres.
+    -   Identificar posibles áreas donde el modelo podría estar capturando correlaciones espurias o donde se necesite una investigación más profunda.
+    La implementación de XAI es un paso crucial hacia un uso responsable y ético de la IA en el ámbito educativo.
 
 ## 5. Futuras Mejoras
 
