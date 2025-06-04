@@ -6,15 +6,22 @@ Este documento define la arquitectura, estructura de navegación y especificacio
 
 1. [Arquitectura General](#1-arquitectura-general)
 2. [Flujo de Desarrollo](#2-flujo-de-desarrollo)
-3. [Componentes Base](#3-componentes-base)
-4. [Módulos y Vistas](#4-módulos-y-vistas)
-   - [Autenticación](#41-autenticación)
-   - [Dashboard](#42-dashboard)
-   - [Gestión Académica](#43-gestión-académica)
-   - [Comunidad Educativa](#44-comunidad-educativa)
-   - [Administración](#45-administración)
-   - [Sistema de Notificaciones](#46-sistema-de-notificaciones)
-   - [Configuración](#47-configuración)
+3. [Componentes y Servicios Base](#3-componentes-y-servicios-base)
+4. [Módulos y Vistas Principales](#4-módulos-y-vistas-principales)
+   - [4.1. Autenticación (CU13)](#41-autenticación-cu13)
+   - [4.2. Dashboard (Rol Específico)](#42-dashboard-rol-específico)
+   - [4.3. Gestión de Usuarios (Admin - CU1)](#43-gestión-de-usuarios-admin---cu1)
+   - [4.4. Gestión de Roles y Permisos (Admin - CU2)](#44-gestión-de-roles-y-permisos-admin---cu2)
+   - [4.5. Gestión de Periodos Académicos (Admin - CU14)](#45-gestión-de-periodos-académicos-admin---cu14)
+   - [4.6. Gestión de Cursos (Admin, Profesor, Estudiante - CU3)](#46-gestión-de-cursos-admin-profesor-estudiante---cu3)
+   - [4.7. Gestión de Asignaturas y Criterios (Admin - CU4)](#47-gestión-de-asignaturas-y-criterios-admin---cu4)
+   - [4.8. Gestión de Calificaciones (Profesor, Estudiante - CU5)](#48-gestión-de-calificaciones-profesor-estudiante---cu5)
+   - [4.9. Gestión de Asistencia (Profesor, Estudiante - CU6)](#49-gestión-de-asistencia-profesor-estudiante---cu6)
+   - [4.10. Gestión de Tutores (Admin, Estudiante - CU8)](#410-gestión-de-tutores-admin-estudiante---cu8)
+   - [4.11. Predicciones de Rendimiento IA (Estudiante, Profesor/Admin - CU9)](#411-predicciones-de-rendimiento-ia-estudiante-profesoradmin---cu9)
+   - [4.12. Reportes Académicos (CU10)](#412-reportes-académicos-cu10)
+   - [4.13. Sistema de Notificaciones (CU11, CU12)](#413-sistema-de-notificaciones-cu11-cu12)
+   - [4.14. Configuración de Cuenta](#414-configuración-de-cuenta)
 5. [Consideraciones Técnicas](#5-consideraciones-técnicas)
 
 ## 1. Arquitectura General
@@ -27,223 +34,447 @@ Este documento define la arquitectura, estructura de navegación y especificacio
 - **Peticiones HTTP**: Axios
 - **Notificaciones en tiempo real**: WebSockets (Socket.io)
 
-### Estructura de Carpetas
+### Estructura de Carpetas Sugerida (React)
 ```
 src/
-├── assets/            # Imágenes, fuentes, etc.
-├── components/        # Componentes reutilizables
-├── contexts/          # Contextos de React (si se usa)
-├── hooks/             # Custom hooks
-├── layouts/           # Layouts de la aplicación
-├── modules/           # Módulos principales (vistas+lógica)
-├── services/          # Servicios API y utilidades
-├── store/             # Estado global (Redux/Vuex)
-├── utils/             # Utilidades y helpers
-└── App.js             # Componente principal
+├── assets/               # Imágenes, fuentes, archivos estáticos
+├── components/           # Componentes UI globales y reutilizables (Button, Input, Card, etc.)
+│   ├── common/             # Componentes muy genéricos
+│   └── layout/           # Componentes de estructura (Header, Sidebar, Footer)
+├── config/               # Configuración de la aplicación (ej. API base URL, constantes)
+├── contexts/             # React Contexts para gestión de estado global o temático
+├── features/             # Módulos de funcionalidad principal (anteriormente 'modules')
+│   ├── auth/
+│   │   ├── components/     # Componentes específicos de autenticación (LoginForm, RegisterForm)
+│   │   ├── hooks/          # Hooks específicos de autenticación
+│   │   ├── services/       # Lógica de llamadas API para autenticación (usa el servicio API general)
+│   │   ├── pages/          # Vistas/páginas (LoginPage, RegisterPage, ProfilePage)
+│   │   └── state/          # (Opcional) Estado local del feature (ej. con Zustand o Redux Toolkit slice)
+│   ├── users/
+│   ├── courses/
+│   ├── grades/
+│   ├── predictions/
+│   ├── admin/
+│   │   ├── userManagement/
+│   │   ├── roleManagement/
+│   │   └── periodManagement/
+│   └── dashboard/
+├── hooks/                # Hooks personalizados globales
+├── layouts/              # Layouts principales de la aplicación (AppLayout, AuthLayout, DashboardLayout)
+├── lib/                  # Instancias de librerías externas (axiosInstance)
+├── pages/                # (Alternativa a features/xxx/pages) Páginas principales si no se usa estructura por feature
+├── services/             # Servicios API generales y abstracciones
+│   ├── api.service.js      # Configuración base de Axios, interceptores JWT
+│   ├── auth.service.js     # Métodos para endpoints de autenticación
+│   ├── user.service.js     # Métodos para endpoints de usuarios
+│   ├── course.service.js   # Métodos para endpoints de cursos
+│   └── ...                 # Otros servicios por entidad/funcionalidad
+├── store/                # Configuración de estado global (Redux, Zustand, etc.)
+│   ├── slices/           # Si se usa Redux Toolkit
+│   └── index.js
+├── styles/               # Estilos globales, temas, variables CSS
+├── types/                # Definiciones TypeScript globales (interfaces, tipos)
+├── utils/                # Funciones de utilidad generales (helpers, formatters)
+└── App.tsx               # Componente raíz de la aplicación, configuración de router
 ```
+**Nota:** La estructura de `features/` (o `modules/`) es crucial y debe reflejar la organización del backend y los Casos de Uso.
 
 ## 2. Flujo de Desarrollo
 
 ### Fase 1: Configuración y Autenticación
 1. Configuración del proyecto y dependencias
-2. Implementación del sistema de autenticación
-3. Configuración de rutas protegidas
-4. Creación de layouts base según roles
+{{ ... }}
 
-### Fase 2: Dashboards y Navegación
-1. Implementación de la navegación principal
-2. Desarrollo de dashboards específicos por rol
-3. Implementación del sistema de notificaciones básico
+## 4. Módulos y Vistas Principales
 
-### Fase 3: Módulos Principales
-1. Desarrollo del módulo de Gestión Académica
-2. Desarrollo del módulo de Comunidad Educativa
-3. Desarrollo del módulo de Administración
+Esta sección detalla los módulos y vistas clave de la aplicación, alineados con los Casos de Uso (CU) del backend. Para cada módulo, se describen rutas, componentes, estado, endpoints y flujos.
 
-### Fase 4: Funcionalidades Avanzadas
-1. Sistema de notificaciones en tiempo real
-2. Visualizaciones y gráficos de datos
-3. Optimizaciones para dispositivos móviles
+**Nota sobre Estructura de Datos y Estado:**
+Las interfaces TypeScript para el estado y los payloads/respuestas de API deben basarse en los `ejemplosjson.md` y los esquemas Pydantic del backend (visibles en `/docs`).
 
-### Fase 5: Pruebas y Refinamiento
-1. Pruebas de integración con el backend
-2. Optimización de rendimiento
-3. Pulido de la experiencia de usuario
+**Tecnologías Asumidas para Ejemplos:** React, React Router, Axios, y una librería de componentes UI (ej. Material-UI o Ant Design).
 
-## 3. Componentes Base
-
-### Componentes de UI
-- **AppLayout**: Layout principal con navegación y contenido
-- **Sidebar**: Navegación lateral adaptativa
-- **Header**: Barra superior con perfil y notificaciones
-- **NotificationCenter**: Centro de notificaciones desplegable
-- **DataTable**: Tabla de datos con paginación, filtros y ordenamiento
-- **FormBuilder**: Constructor de formularios dinámicos
-- **Card**: Contenedor de información estilizado
-- **Modal**: Ventanas modales para acciones específicas
-- **Loader**: Indicadores de carga
-
-### Servicios
-- **ApiService**: Cliente HTTP centralizado
-- **AuthService**: Gestión de autenticación y tokens
-- **NotificationService**: Gestión de notificaciones
-- **StorageService**: Manejo del almacenamiento local
-- **WebSocketService**: Comunicación en tiempo real
-
-## 4. Módulos y Vistas
-
-Esta sección detalla cada módulo y vista de la aplicación, especificando los componentes necesarios, la estructura de datos, los endpoints a consumir y cómo implementar las interacciones principales.
-
-### 4.1 Autenticación
+### 4.1. Autenticación (CU13)
 
 #### Login
 - **Ruta**: `/login`
-- **Componentes**:
-  - `LoginForm`: Formulario principal con campos email/usuario y contraseña
-  - `RememberMeCheckbox`: Control para recordar sesión
-  - `ForgotPasswordLink`: Enlace para recuperación de contraseña
-  - `LoginButton`: Botón de envío con estados de carga
-  - `LoginErrorMessage`: Componente para mostrar errores de autenticación
-- **Estado**:
-  ```typescript
-  interface LoginState {
-    email: string;
-    password: string;
-    rememberMe: boolean;
+{{ ... }}
     isLoading: boolean;
     error: string | null;
   }
   ```
 - **Endpoints**:
-  - `POST /api/v1/auth/login` - Autenticación de usuario
-    - **Payload**: `{ email, password, remember_me }`
-    - **Respuesta exitosa**: Token JWT y datos básicos del usuario
-    - **Manejo de errores**: Mostrar `LoginErrorMessage` con mensaje específico
+  - `POST /api/v1/auth/login` - Autenticación de usuario.
+    - **Payload (según ejemplosjson.md)**: `{ "email": "admin@smartacademy.com", "password": "admin123" }` (el campo `remember_me` no está en el ejemplo JSON, verificar si es necesario o si se maneja de otra forma, ej. duración del token).
+    - **Respuesta exitosa (según ejemplosjson.md)**: `{ "access_token", "token_type", "user_id", "email", "full_name", "role", "is_superuser" }`.
+    - **Manejo de errores**: Mostrar `LoginErrorMessage` con mensaje de `detail` de la respuesta (ej. "Credenciales incorrectas").
 - **Flujo de acciones**:
   1. Usuario ingresa credenciales
   2. Al enviar, mostrar estado de carga en `LoginButton`
   3. Llamar al endpoint de login
   4. Si es exitoso, almacenar token en `AuthService` y redirigir al dashboard según rol
-  5. Si hay error, mostrar mensaje descriptivo con sugerencias de solución
-- **Ejemplo de implementación**:
-  ```jsx
-  const LoginPage = () => {
-    const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const { login } = useAuth(); // Hook personalizado para autenticación
-    const navigate = useNavigate();
-    
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const userData = await login(formData.email, formData.password, formData.rememberMe);
-        // Redirigir según rol
-        if (userData.role === 'student') {
-          navigate('/dashboard/student');
-        } else if (userData.role === 'teacher') {
-          navigate('/dashboard/teacher');
-        } else if (userData.role === 'administrator') {
-          navigate('/dashboard/admin');
-        } else {
-          navigate('/dashboard');
-        }
-      } catch (err) {
-        setError(err.response?.data?.detail || 'Error de autenticación');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    return (
-      <AuthLayout imageUrl="/assets/images/school-background.jpg">
-        <LoginCard>
-          <Logo />
-          <h1>Iniciar Sesión</h1>
-          
-          {error && <LoginErrorMessage message={error} />}
-          
-          <form onSubmit={handleSubmit}>
-            <TextField 
-              label="Correo electrónico"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              required
-            />
-            
-            <PasswordField 
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              required
-            />
-            
-            <div className="form-actions">
-              <RememberMeCheckbox 
-                checked={formData.rememberMe}
-                onChange={(e) => setFormData({...formData, rememberMe: e.target.checked})}
-              />
-              <ForgotPasswordLink to="/forgot-password" />
-            </div>
-            
-            <LoginButton isLoading={isLoading} />
-          </form>
-        </LoginCard>
+{{ ... }}
       </AuthLayout>
     );
   };
   ```
 
-#### Registro
-- **Ruta**: `/register`
+#### Registro de Administrador (Superusuario)
+- **Ruta**: `/admin/register-admin` (Ruta protegida, accesible solo por superusuarios)
 - **Componentes**:
-  - `RegistrationForm`: Formulario multi-paso para registro
-  - `RegistrationStepper`: Indicador de progreso de pasos
-  - `PersonalInfoStep`: Paso 1 - Información personal
-  - `CredentialsStep`: Paso 2 - Credenciales
-  - `RoleSelectionStep`: Paso 3 - Selección de rol (si aplica)
-  - `TermsAndConditionsStep`: Paso 4 - Aceptación de términos
+  - `AdminRegistrationForm`: Formulario con campos para email, password, full_name, phone, direction, birth_date, gender.
+  - `SubmitButton`: Botón de envío con estados de carga.
+  - `SuccessMessage`/`ErrorMessage`: Para feedback.
+- **Estado**:
+  ```typescript
+  interface AdminRegistrationState {
+    formData: {
+      email: string;
+      password: string;
+      full_name: string;
+      phone?: string;
+      direction?: string;
+      birth_date?: string; // YYYY-MM-DD
+      gender?: 'male' | 'female' | 'other';
+    };
+    isLoading: boolean;
+    error: string | null;
+    successMessage: string | null;
+  }
+  ```
 - **Endpoints**:
-  - `POST /api/v1/auth/register` - Registro de nuevo usuario
-    - **Payload**: Datos completos del usuario incluyendo rol
-    - **Procesamiento**: Al completar registro exitoso, mostrar mensaje de confirmación
-    - **Validaciones**: Implementar validaciones en tiempo real para cada campo
-- **Implementación**:
-  - Utilizar máquina de estados para controlar flujo de registro
-  - Validar cada paso antes de permitir avanzar
-  - Almacenar datos parciales entre pasos
-  - Ofrecer opción de guardar y continuar después
+  - `POST /api/v1/auth/register-admin`
+    - **Payload**: `{ email, password, full_name, phone, direction, birth_date, gender }`.
+    - **Respuesta exitosa**: Datos del nuevo administrador creado.
+    - **Manejo de errores**: Mostrar mensajes de `detail` (ej. "El correo electrónico ya está registrado", "No tiene suficientes permisos").
+- **Flujo de acciones**:
+  1. Superusuario navega a la ruta.
+  2. Ingresa datos del nuevo administrador.
+  3. Al enviar, se llama a `AuthService.registerAdmin()`.
+  4. Mostrar feedback (éxito o error).
 
-#### Recuperación de Contraseña
-- **Ruta**: `/forgot-password`
+#### Perfil del Usuario (Mi Perfil)
+- **Ruta**: `/profile` o `/account/me`
 - **Componentes**:
-  - `ForgotPasswordForm`: Formulario para solicitar recuperación
-  - `ResetInstructionsCard`: Componente para mostrar instrucciones enviadas
-  - `PasswordResetForm`: Formulario para establecer nueva contraseña
-  - `PasswordStrengthMeter`: Indicador de fortaleza de contraseña
+  - `UserProfileDisplay`: Muestra la información del usuario actual (full_name, email, role, etc.).
+  - `EditProfileButton`: Enlace a una página de edición de perfil (si aplica, ver CU1 PUT /api/v1/users/{user_id}).
+  - `ChangePasswordButton`: Enlace a la página de cambio de contraseña.
+- **Estado**:
+  ```typescript
+  interface UserProfileState {
+    userData: { // Basado en la respuesta de /api/v1/auth/users/me
+      id: number;
+      email: string;
+      full_name: string;
+      phone?: string;
+      direction?: string;
+      birth_date?: string;
+      gender?: string;
+      role: string;
+      photo?: string | null;
+      is_active: boolean;
+      is_superuser: boolean;
+    } | null;
+    isLoading: boolean;
+    error: string | null;
+  }
+  ```
 - **Endpoints**:
-  - `POST /api/v1/auth/password-recovery` - Solicitar recuperación
-    - **Payload**: `{ email }`
-    - **Acción**: Enviar email con token de recuperación
-  - `POST /api/v1/auth/reset-password` - Restablecer contraseña
-    - **Payload**: `{ token, new_password }`
-    - **Validación**: Verificar requisitos de seguridad de contraseña
-- **Flujo completo**:
-  1. Usuario ingresa email en `ForgotPasswordForm`
-  2. Sistema valida email y envía instrucciones
-  3. Mostrar `ResetInstructionsCard` con próximos pasos
-  4. Usuario hace clic en enlace recibido por email
-  5. Sistema valida token en URL
-  6. Mostrar `PasswordResetForm` con `PasswordStrengthMeter`
-  7. Usuario establece y confirma nueva contraseña
-  8. Sistema actualiza credenciales y redirige a login
+  - `GET /api/v1/auth/users/me` (Llamado al cargar la página vía `AuthService.getCurrentUser()`)
+- **Flujo de acciones**:
+  1. Usuario navega a la ruta.
+  2. Se obtienen los datos del usuario actual.
+  3. Se muestra la información.
 
-### 4.2 Dashboard
+#### Cambiar Contraseña
+- **Ruta**: `/profile/change-password` o `/account/change-password`
+- **Componentes**:
+  - `ChangePasswordForm`: Campos para contraseña actual y nueva contraseña (con confirmación).
+- **Estado**:
+  ```typescript
+  interface ChangePasswordState {
+    current_password: string;
+    new_password: string;
+    confirm_password: string;
+    isLoading: boolean;
+    error: string | null;
+    successMessage: string | null;
+  }
+  ```
+- **Endpoints**:
+  - `POST /api/v1/auth/change-password`
+    - **Payload**: `{ current_password, new_password }`.
+    - **Respuesta exitosa**: `{ message: "Contraseña actualizada correctamente" }`.
+- **Flujo de acciones**:
+  1. Usuario ingresa contraseñas.
+  2. Al enviar, se llama a `AuthService.changePassword()`.
+  3. Mostrar feedback.
 
-Los dashboards son interfaces personalizadas según el rol del usuario que muestran información relevante y acciones disponibles.
+### 4.2. Dashboard (Rol Específico)
+- **Ruta**: `/dashboard` (podría redirigir a `/dashboard/student`, `/dashboard/teacher`, `/dashboard/admin` según rol).
+- **Descripción**: Página principal después del login. Su contenido varía significativamente según el rol del usuario.
+- **Componentes Comunes**:
+  - `DashboardLayout`: Layout específico con Sidebar y Header.
+  - `WelcomeMessage`: Saludo al usuario.
+  - `QuickAccessLinks`: Enlaces a las funcionalidades más usadas por ese rol.
+  - `NotificationPanel`: Resumen de notificaciones recientes.
+- **Componentes Específicos por Rol**:
+  - **Estudiante**: `MyCoursesWidget`, `UpcomingAssignmentsWidget`, `MyPerformanceSnapshotWidget` (con datos de predicción si CU9 está activo).
+  - **Profesor**: `MyClassesWidget`, `PendingSubmissionsWidget`, `StudentPerformanceOverviewWidget`.
+  - **Administrador**: `SystemStatsWidget` (usuarios, cursos), `AdminToolsWidget` (enlaces a gestión de usuarios, roles, etc.), `ModelTrainingStatusWidget` (si CU9 está activo).
+- **Endpoints**: Dependerá de los widgets y datos a mostrar. Puede requerir múltiples llamadas a servicios de cursos, predicciones, usuarios, etc.
+
+### 4.3. Gestión de Usuarios (Admin - CU1)
+- **Ruta Base**: `/admin/users`
+- **Permisos**: Solo Administradores y Superusuarios.
+- **Vistas/Páginas**:
+  - **Lista de Usuarios (`/admin/users`)**
+    - **Componentes**: `UserTable` (con `DataTable` base), `FilterControls` (filtrar por rol, activo/inactivo), `CreateUserButton`.
+    - **Estado**: Lista de usuarios, filtros, paginación.
+    - **Endpoint**: `GET /api/v1/users/` (con parámetros de filtro y paginación).
+  - **Crear Usuario (`/admin/users/new`)**
+    - **Componentes**: `UserForm` (campos: email, password, full_name, phone, direction, birth_date, gender, role).
+    - **Estado**: Datos del formulario.
+    - **Endpoint**: `POST /api/v1/users/`.
+    - **Payload**: `{ email, password, full_name, phone, direction, birth_date, gender, role }` (ver `ejemplosjson.md` para estructura exacta y valores de `gender`, `role`).
+  - **Editar Usuario (`/admin/users/:userId/edit`)**
+    - **Componentes**: `UserForm` (precargado con datos del usuario, sin campo de contraseña o con manejo especial para cambio de contraseña).
+    - **Estado**: Datos del formulario, ID del usuario.
+    - **Endpoints**: `GET /api/v1/users/{user_id}` para cargar datos, `PUT /api/v1/users/{user_id}` para guardar.
+  - **Ver Detalles del Usuario (`/admin/users/:userId`)**
+    - **Componentes**: `UserDetailsDisplay`, `UserRolesList` (ver CU2).
+    - **Endpoint**: `GET /api/v1/users/{user_id}`.
+- **Servicio**: `UserService`.
+
+### 4.4. Gestión de Roles y Permisos (Admin - CU2)
+- **Ruta Base**: `/admin/roles`
+- **Permisos**: Solo Administradores.
+- **Vistas/Páginas**:
+  - **Lista de Roles (`/admin/roles`)**
+    - **Componentes**: `RoleTable`, `CreateRoleButton`.
+    - **Endpoint**: `GET /api/v1/roles/`.
+  - **Crear/Editar Rol (`/admin/roles/new`, `/admin/roles/:roleId/edit`)**
+    - **Componentes**: `RoleForm` (nombre del rol, descripción, potencialmente asignación de permisos granulares si el backend lo soporta más allá del nombre del rol).
+    - **Endpoints**: `POST /api/v1/roles/`, `PUT /api/v1/roles/{role_id}`.
+  - **Asignar Roles a Usuarios**: Esta funcionalidad podría integrarse en la vista de edición de usuario (`/admin/users/:userId/edit`) o en una vista dedicada.
+    - **Componentes**: Selector de roles disponibles, lista de roles asignados al usuario.
+    - **Endpoints**: `GET /api/v1/users/{user_id}/roles` para ver roles actuales, `POST /api/v1/roles/{role_id}/assign_to_user/{user_id}`, `POST /api/v1/roles/{role_id}/remove_from_user/{user_id}`.
+- **Servicio**: `RoleService`, `UserService`.
+
+### 4.5. Gestión de Periodos Académicos (Admin - CU14)
+- **Ruta Base**: `/admin/periods`
+- **Permisos**: Solo Administradores.
+- **Vistas/Páginas**:
+  - **Lista de Periodos (`/admin/periods`)**
+    - **Componentes**: `PeriodsTable`, `CreatePeriodButton`.
+    - **Endpoint**: `GET /api/v1/periods/`.
+  - **Crear/Editar Periodo (`/admin/periods/new`, `/admin/periods/:periodId/edit`)**
+    - **Componentes**: `PeriodForm` (nombre, fecha de inicio, fecha de fin).
+    - **Endpoints**: `POST /api/v1/periods/`, `PUT /api/v1/periods/{period_id}`.
+- **Servicio**: `PeriodService`.
+
+### 4.6. Gestión de Cursos (Admin, Profesor, Estudiante - CU3)
+- **Ruta Base**: `/courses`
+- **Vistas/Páginas (Rol Dependiente)**:
+  - **Lista de Cursos (`/courses`)**
+    - **Admin/Profesor**: `CourseTable` con opciones de gestión, filtros (por profesor, nivel, grado). `CreateCourseButton` (Admin).
+    - **Estudiante**: `EnrolledCoursesList` (tarjetas o lista simple).
+    - **Endpoint**: `GET /api/v1/courses/` (con filtros `profesor_id`, `estudiante_id` según rol).
+  - **Crear Curso (Admin) (`/admin/courses/new`)**
+    - **Componentes**: `CourseForm` (nombre, descripción, profesor asignado, nivel, grado).
+    - **Endpoint**: `POST /api/v1/courses/`.
+  - **Ver Detalles del Curso (`/courses/:courseId`)**
+    - **Admin/Profesor**: `CourseDetailsDisplay`, `StudentListInCourse` (con opción de inscribir/remover para Admin - ver endpoints `.../students`), `CourseAssignmentsList`.
+    - **Estudiante**: `CourseDetailsDisplay`, `MyGradesInCourse`, `CourseMaterials`, `AssignmentsList`.
+    - **Endpoints**: `GET /api/v1/courses/{course_id}`, `GET /api/v1/courses/{course_id}/students` (Admin/Profesor).
+  - **Editar Curso (Admin) (`/admin/courses/:courseId/edit`)**
+    - **Componentes**: `CourseForm` precargado.
+    - **Endpoint**: `PUT /api/v1/courses/{course_id}`.
+  - **Inscribir Estudiantes en Curso (Admin) (`/admin/courses/:courseId/manage-students`)**
+    - **Componentes**: Selector de estudiantes, lista de estudiantes inscritos.
+    - **Endpoints**: `POST /api/v1/courses/{course_id}/students`, `DELETE /api/v1/courses/{course_id}/students/{student_id}`.
+- **Servicio**: `CourseService`, `UserService`.
+
+### 4.7. Gestión de Asignaturas y Criterios (Admin - CU4)
+- **Ruta Base**: `/admin/subjects`
+- **Permisos**: Solo Administradores.
+- **Vistas/Páginas**:
+  - **Lista de Asignaturas (`/admin/subjects`)**
+    - **Componentes**: `SubjectsTable`, `CreateSubjectButton`.
+    - **Estado**: Lista de asignaturas, filtros.
+    - **Endpoint**: `GET /api/v1/subjects/`.
+  - **Crear/Editar Asignatura (`/admin/subjects/new`, `/admin/subjects/:subjectId/edit`)**
+    - **Componentes**: `SubjectForm` (nombre, descripción, ¿asociación a niveles/grados?).
+    - **Estado**: Datos del formulario.
+    - **Endpoints**: `POST /api/v1/subjects/`, `PUT /api/v1/subjects/{subject_id}`.
+  - **Gestionar Subcriterios de Evaluación (`/admin/subjects/:subjectId/subcriteria`)**
+    - **Componentes**: `SubcriteriaTable` (para la asignatura seleccionada), `CreateSubcriterionButton`.
+    - **Estado**: Lista de subcriterios para la asignatura.
+    - **Endpoint (Crear)**: `POST /api/v1/subjects/{subject_id}/subcriteria`.
+      - **Payload**: `{ "name": "string", "max_weight": number }`.
+    - **Endpoints (Listar, Editar, Eliminar)**: Necesitarían definirse en el backend si no existen (ej. `GET /api/v1/subjects/{subject_id}/subcriteria`, `PUT /api/v1/subcriteria/{subcriterion_id}`, `DELETE /api/v1/subcriteria/{subcriterion_id}`).
+- **Servicio**: `SubjectService`.
+
+### 4.8. Gestión de Calificaciones (Profesor, Estudiante - CU5)
+- **Ruta Base**: `/grades` (o integrado en vistas de curso/estudiante)
+- **Permisos**: Profesor (registrar/editar), Estudiante/Padre (consultar).
+- **Vistas/Páginas**:
+  - **Registrar/Editar Calificaciones (Profesor) (`/teacher/courses/:courseId/subject/:subjectId/grades`)**
+    - **Componentes**: `GradeEntryForm` (selección de estudiante, periodo, subcriterios con campos para `value_to_be`, `value_to_know`, `value_to_do`, `value_to_decide`, `value_to_self-evaluate`). `GradesTable` para visualizar notas existentes del grupo.
+    - **Estado**: Datos del formulario, lista de estudiantes del curso, subcriterios de la asignatura.
+    - **Endpoints**:
+      - `POST /api/v1/grades/` para registrar nuevas calificaciones.
+        - **Payload**: `{ student_id, subject_id, period_id, subcriterion_id, value_to_be, value_to_know, value_to_do, value_to_decide, value_to_self_evaluate }` (adaptar según `ejemplosjson.md`).
+      - `GET /api/v1/students/{student_id}/grades?subject_id=X&period_id=Y` para ver/editar existentes.
+      - `PUT /api/v1/grades/{grade_id}` (si se permite edición individual de registros de nota).
+  - **Ver Mis Calificaciones (Estudiante) (`/student/grades` o `/student/courses/:courseId/grades`)**
+    - **Componentes**: `GradesDisplayTable` (agrupadas por asignatura/periodo), `GradeCharts`.
+    - **Estado**: Lista de calificaciones del estudiante.
+    - **Endpoint**: `GET /api/v1/students/{student_id}/grades` (con filtros opcionales por periodo, asignatura).
+  - **Ver Calificaciones del Estudiante (Padre)**: Similar al estudiante, pero con selector de hijo si aplica.
+- **Servicio**: `GradeService`, `CourseService`, `SubjectService`.
+
+### 4.9. Gestión de Asistencia (Profesor, Estudiante - CU6)
+- **Ruta Base**: `/attendance` (o integrado)
+- **Permisos**: Profesor (registrar), Estudiante/Padre (consultar).
+- **Vistas/Páginas**:
+  - **Registrar Asistencia (Profesor) (`/teacher/courses/:courseId/attendance`)**
+    - **Componentes**: `AttendanceSheet` (lista de estudiantes del curso, selector de fecha, checkboxes/radios para presente/ausente/tardanza).
+    - **Estado**: Fecha seleccionada, lista de estudiantes, estados de asistencia.
+    - **Endpoint**: `POST /api/v1/attendances/`.
+      - **Payload**: `{ "student_id": number, "course_id": number, "date": "YYYY-MM-DD", "status": "present" | "absent" | "late" }` (puede ser un array de registros).
+  - **Ver Mi Asistencia (Estudiante) (`/student/attendance` o `/student/courses/:courseId/attendance`)**
+    - **Componentes**: `AttendanceCalendarView`, `AttendanceSummary`.
+    - **Estado**: Registros de asistencia del estudiante.
+    - **Endpoint**: `GET /api/v1/students/{student_id}/attendances` (con filtros por curso, rango de fechas).
+- **Servicio**: `AttendanceService`, `CourseService`.
+
+### 4.10. Gestión de Tutores (Admin, Estudiante - CU8)
+- **Ruta Base**: `/tutors`
+- **Permisos**: Administrador (asignar), Estudiante/Padre (ver tutores asignados).
+- **Vistas/Páginas**:
+  - **Asignar Tutor a Estudiante (Admin) (`/admin/students/:studentId/manage-tutors`)**
+    - **Componentes**: `TutorAssignmentForm` (selector de usuario tutor, lista de tutores ya asignados al estudiante).
+    - **Estado**: ID del estudiante, ID del tutor a asignar.
+    - **Endpoints**:
+      - `POST /api/v1/tutors/assign` 
+        - **Payload**: `{ "student_id": number, "tutor_id": number }`.
+      - `GET /api/v1/students/{student_id}/tutors` para listar tutores asignados.
+      - `DELETE /api/v1/tutors/remove` (o similar) para desasignar.
+        - **Payload**: `{ "student_id": number, "tutor_id": number }`.
+  - **Ver Mis Tutores (Estudiante/Padre)**: Podría ser parte del perfil del estudiante.
+    - **Componentes**: `TutorListDisplay`.
+    - **Endpoint**: `GET /api/v1/students/{student_id}/tutors`.
+- **Servicio**: `TutorService`, `UserService`.
+
+### 4.11. Predicciones de Rendimiento IA (Estudiante, Profesor/Admin - CU9)
+- **Ruta Base**: `/predictions`
+- **Permisos**: Estudiante (ver propia), Profesor (ver de sus estudiantes), Admin (ver todas, entrenar modelo).
+- **Vistas/Páginas**:
+  - **Ver Mi Predicción (Estudiante) (`/student/my-prediction`)**
+    - **Componentes**: `PredictionDisplay` (estado de predicción, factores influyentes si XAI está disponible), `HistoricalPredictionsChart`.
+    - **Estado**: Datos de predicción.
+    - **Endpoint**: `GET /api/v1/predictions/student/{student_id}`.
+  - **Ver Predicciones de Estudiantes (Profesor) (`/teacher/courses/:courseId/predictions`)**
+    - **Componentes**: `StudentPredictionTable` (lista de estudiantes del curso con sus predicciones), `RiskIndicator`.
+    - **Estado**: Lista de predicciones.
+    - **Endpoint**: `GET /api/v1/predictions/course/{course_id}` (o similar, backend debe proveer endpoint para esto).
+  - **Panel de Control IA (Admin) (`/admin/ai/predictions`)**
+    - **Componentes**: `ModelTrainingButton`, `TrainingStatusDisplay`, `OverallPredictionStats`.
+    - **Estado**: Estado del último entrenamiento, estadísticas.
+    - **Endpoints**:
+      - `POST /api/v1/predictions/train-model`.
+      - `GET /api/v1/predictions/status` (o similar para estado del modelo/entrenamiento).
+- **Servicio**: `PredictionService`.
+
+### 4.12. Reportes Académicos (CU10)
+- **Ruta Base**: `/reports`
+- **Permisos**: Administradores, Profesores (según el tipo de reporte).
+- **Vistas/Páginas**:
+  - **Generador de Reportes (Admin/Profesor) (`/reports/generate`)**
+    - **Componentes**: `ReportSelectionForm` (tipo de reporte, filtros: periodo, curso, estudiante, etc.), `GenerateReportButton`.
+    - **Estado**: Parámetros del reporte.
+    - **Endpoints**: Dependerá de los endpoints específicos que el backend exponga para cada tipo de reporte (ej. `GET /api/v1/reports/academic-summary?student_id=X`, `GET /api/v1/reports/course-performance?course_id=X`).
+    - **Respuesta**: Podría ser un JSON para mostrar en frontend o un enlace a un archivo PDF/CSV generado.
+- **Servicio**: `ReportService`.
+
+### 4.13. Sistema de Notificaciones (CU11, CU12)
+- **Integrado en el Layout Principal** (`Header`, `NotificationCenter`).
+- **Permisos**: Todos los usuarios reciben notificaciones relevantes para ellos.
+- **Componentes**:
+  - `NotificationIcon` (en Header, con contador de no leídas).
+  - `NotificationDropdownList` (al hacer clic en el icono).
+  - `NotificationPage` (`/notifications` para ver historial completo).
+- **Estado Global**: Lista de notificaciones, contador de no leídas.
+- **Endpoints**:
+  - `GET /api/v1/notifications/` (para obtener notificaciones del usuario).
+  - `POST /api/v1/notifications/{notification_id}/mark-as-read`.
+- **WebSocket**: Si se usa para tiempo real, `WebSocketService` escuchará eventos y actualizará el estado de notificaciones.
+- **Servicio**: `NotificationService`, `WebSocketService`.
+
+### 4.14. Configuración de Cuenta
+- **Ruta Base**: `/account` o `/profile` (ya parcialmente cubierto en Autenticación 4.1).
+- **Permisos**: Usuario autenticado para su propia cuenta.
+- **Vistas/Páginas Adicionales**:
+  - **Editar Perfil (`/account/edit-profile`)**
+    - **Componentes**: `ProfileForm` (campos: full_name, phone, direction, birth_date, gender, photo).
+    - **Estado**: Datos del formulario.
+    - **Endpoint**: `PUT /api/v1/users/{user_id}` (usando el ID del usuario actual).
+      - **Payload**: Según `ejemplosjson.md` para actualizar usuario.
+    - **Componentes**: Switches para activar/desactivar tipos de notificaciones.
+    - **Endpoints**: Backend necesitaría endpoints para guardar estas preferencias.
+- **Servicio**: `UserService`, `AuthService`.
+
+## 5. Consideraciones Técnicas Adicionales
+
+Esta sección aborda aspectos técnicos transversales importantes para el desarrollo del frontend de Smart Academy.
+
+- **Gestión de Estado Avanzada:**
+  - Si bien React Context puede ser suficiente para algunas áreas, para funcionalidades complejas con estado global compartido (ej. datos del usuario autenticado, notificaciones, configuraciones globales de UI), se podría considerar una librería dedicada como Zustand o Redux Toolkit.
+  - La elección dependerá de la complejidad creciente de la aplicación y la preferencia del equipo de desarrollo.
+  - Se debe priorizar la atomicidad del estado y la optimización de re-renders.
+
+- **Internacionalización (i18n) y Localización (l10n):**
+  - Planificar desde el inicio el soporte para múltiples idiomas si es un requerimiento futuro.
+  - Utilizar librerías como `i18next` o `react-intl`.
+  - Externalizar todas las cadenas de texto a archivos de traducción.
+  - Considerar formatos de fecha, números y moneda específicos por localización.
+
+- **Accesibilidad (a11y):**
+  - Seguir las directrices WCAG (Web Content Accessibility Guidelines) para asegurar que la aplicación sea usable por personas con diversas capacidades.
+  - Uso semántico de HTML, atributos ARIA cuando sea necesario, contraste de color adecuado, navegabilidad por teclado, y compatibilidad con lectores de pantalla.
+  - Realizar pruebas de accesibilidad regulares.
+
+- **Pruebas (Testing):**
+  - **Pruebas Unitarias**: Para componentes individuales, hooks y funciones de utilidad (ej. con Jest y React Testing Library).
+  - **Pruebas de Integración**: Para flujos de usuario que involucran múltiples componentes y servicios (ej. con React Testing Library, simulando interacciones con API mediante mocks de Axios/fetch).
+  - **Pruebas End-to-End (E2E)**: Para verificar flujos completos de la aplicación desde la perspectiva del usuario (ej. con Cypress o Playwright). Aunque más costosas de mantener, son valiosas para asegurar la estabilidad de las funcionalidades críticas.
+  - Establecer una estrategia de cobertura de pruebas.
+
+- **Optimización del Rendimiento:**
+  - **Code Splitting**: Dividir el código en chunks más pequeños que se cargan bajo demanda (React.lazy, Suspense) para reducir el tiempo de carga inicial.
+  - **Memoización**: Usar `React.memo`, `useMemo`, `useCallback` para prevenir re-renders innecesarios.
+  - **Optimización de Imágenes**: Comprimir imágenes y usar formatos modernos (ej. WebP). Carga diferida (lazy loading) de imágenes.
+  - **Virtualización de Listas**: Para listas largas, usar técnicas de virtualización (ej. `react-window` o `react-virtualized`) para renderizar solo los elementos visibles.
+  - **Manejo de Caché**: Estrategias de caché para datos de API (ej. con React Query, SWR, o interceptores de Axios).
+
+- **Manejo de Errores y Logging:**
+  - Implementar un sistema robusto de manejo de errores en el frontend.
+  - Usar Error Boundaries en React para capturar errores en partes de la UI y evitar que toda la aplicación falle.
+  - Considerar la integración con servicios de logging y monitoreo de errores en producción (ej. Sentry, LogRocket) para identificar y diagnosticar problemas rápidamente.
+
+- **Seguridad en el Frontend:**
+  - Aunque la lógica de negocio principal y la validación crítica residen en el backend, el frontend debe seguir buenas prácticas:
+    - Protegerse contra XSS (Cross-Site Scripting) sanitizando entradas y usando correctamente las capacidades de React para renderizar contenido.
+    - No almacenar información sensible en `localStorage` si no es estrictamente necesario y está adecuadamente protegida.
+    - Asegurar que las comunicaciones con el backend sean siempre sobre HTTPS.
+    - Manejo seguro de tokens JWT (ej. almacenarlos en `httpOnly` cookies si el backend lo soporta, o en memoria/`sessionStorage` con precauciones).
+
+- **Convenciones de Código y Linting:**
+  - Establecer y seguir convenciones de código consistentes (ej. Airbnb JavaScript Style Guide).
+  - Utilizar herramientas de linting (ESLint) y formateo (Prettier) para mantener la calidad y uniformidad del código.
+  - Configurar hooks de pre-commit (ej. Husky) para ejecutar linters y formateadores antes de cada commit.
+
 
 #### Dashboard de Estudiante
 - **Ruta**: `/dashboard/student`
