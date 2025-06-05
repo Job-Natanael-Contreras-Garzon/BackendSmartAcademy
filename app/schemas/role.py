@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any, List
 class RoleBase(BaseModel):
     name: str
     description: Optional[str] = None
-    permissions: Dict[str, Any] = {}
+    permissions: Optional[Dict[str, Any]] = {}
 
 class RoleCreate(RoleBase):
     pass
@@ -18,7 +18,7 @@ class RoleResponse(RoleBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RoleAssignment(BaseModel):
     role_id: int

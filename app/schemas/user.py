@@ -1,19 +1,20 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict, Any
+from .role import RoleResponse as RoleSchemaResponse # Import RoleResponse
 from datetime import datetime, date
 from enum import Enum
 
 # Enumeraciones para campos específicos
 class GenderEnum(str, Enum):
-    FEMALE = "female"
-    MALE = "male"
-    OTHER = "other"
+    FEMALE = "FEMALE"
+    MALE = "MALE"
+    OTHER = "OTHER"
 
 class RoleEnum(str, Enum):
-    STUDENT = "student"
-    TEACHER = "teacher"
-    PARENT = "parent"
-    ADMINISTRATOR = "administrator"
+    STUDENT = "STUDENT"
+    TEACHER = "TEACHER"
+    PARENT = "PARENT"
+    ADMINISTRATOR = "ADMINISTRATOR"
 
 # Esquemas base para usuario
 class UserBase(BaseModel):
@@ -24,7 +25,7 @@ class UserCreate(UserBase):
     password: str
     phone: Optional[str] = None
     direction: Optional[str] = None
-    birth_date: Optional[str] = None
+    birth_date: Optional[date] = None  # Changed from str to date
     gender: Optional[GenderEnum] = GenderEnum.OTHER
     role: Optional[RoleEnum] = RoleEnum.STUDENT
     is_superuser: Optional[bool] = False
@@ -34,25 +35,26 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     direction: Optional[str] = None
-    birth_date: Optional[str] = None
+    birth_date: Optional[date] = None  # Changed from str to date
     gender: Optional[GenderEnum] = None
     photo: Optional[str] = None  # Puede ser una URL como string
     is_active: Optional[bool] = None
-    role: Optional[RoleEnum] = None  # Añadido campo role
+    is_superuser: Optional[bool] = None  # Added is_superuser
+    role: Optional[RoleEnum] = None
 
 class UserResponse(UserBase):
     id: int
     phone: Optional[str] = None
     direction: Optional[str] = None
-    birth_date: Optional[str] = None
+    birth_date: Optional[date] = None  # Changed from str to date
     gender: GenderEnum
-    role: RoleEnum
+    role: RoleSchemaResponse # Use RoleResponse schema for nested role details
     photo: Optional[str] = None
     is_active: bool
     is_superuser: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Esquemas para autenticación
 class Token(BaseModel):

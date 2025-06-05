@@ -1,13 +1,14 @@
 from datetime import timedelta
-from typing import Any
+from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.core.config import settings
 from app.core.security import create_access_token, get_password_hash, verify_password, get_current_user, get_current_active_user, get_current_active_superuser
-from app.schemas.user import Token, UserCreate, UserResponse, PasswordChange
+from app.schemas.user import Token, UserCreate, UserResponse, PasswordChange, GenderEnum, RoleEnum as SchemaRoleEnum
 from app.models.user import User, RoleEnum
+from app.models.role import Role as RoleModel # For fetching full role details
 from app.config.database import get_db
 
 # Esquema para login con JSON
@@ -20,11 +21,11 @@ class AdminRegisterData(BaseModel):
     email: str
     password: str
     full_name: str
-    phone: str = None
-    direction: str = None
-    birth_date: str = None
-    gender: str = None
-    
+    phone: Optional[str] = None
+    direction: Optional[str] = None
+    birth_date: Optional[str] = None
+    gender: Optional[GenderEnum] = GenderEnum.OTHER
+
     class Config:
         from_attributes = True
 
@@ -103,23 +104,14 @@ async def register_admin(
             detail="El correo electrónico ya está registrado"
         )
     
-    # Procesar el género: convertir a minúsculas o usar el valor del enum
-    gender_value = None
-    if admin_data.gender:
-        # Intentar mapear el género a uno de los valores válidos
-        gender_lower = admin_data.gender.lower()
-        if gender_lower in ["female", "male", "other"]:
-            gender_value = gender_lower
-        else:
-            # Si el valor es un nombre de enum, convertirlo al valor correspondiente
-            gender_map = {"female": "female", "male": "male", "other": "other",
-                          "FEMALE": "female", "MALE": "male", "OTHER": "other"}
-            gender_value = gender_map.get(admin_data.gender, "other")
+    # Procesar el género
+    gender_value_for_sql = admin_data.gender.value if admin_data.gender else GenderEnum.OTHER.value
     
     # Usar SQL directo para evitar problemas con los enums
     from sqlalchemy import text
     hashed_password = get_password_hash(admin_data.password)
-    role_value = RoleEnum.ADMINISTRATOR.value  # Usar el valor 'administrator' (minúsculas)
+    # El rol para un nuevo administrador siempre será ADMINISTRATOR (en mayúsculas)
+    role_value_for_sql = SchemaRoleEnum.ADMINISTRATOR.value # Esto es "ADMINISTRATOR"
     
     # Ejecutar SQL para insertar el usuario
     result = db.execute(
@@ -137,8 +129,8 @@ async def register_admin(
             "phone": admin_data.phone,
             "direction": admin_data.direction,
             "birth_date": admin_data.birth_date,
-            "gender": gender_value,
-            "role": role_value,
+            "gender": gender_value_for_sql,
+            "role": role_value_for_sql,
             "is_active": True,
             "is_superuser": True
         }
@@ -178,37 +170,37 @@ async def register_admin(
         is_superuser=True
     )
 
-@router.get("/users/me/", response_model=UserResponse)
+@router.get("/me", response_model=UserResponse)
 async def read_users_me(
-    current_user = Depends(get_current_active_user)
+    current_user = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
 ):
     """Obtener información del usuario actual"""
-    # Convertir el objeto current_user (que viene de SQL directo) a UserResponse
-    from app.schemas.user import UserResponse, GenderEnum, RoleEnum as SchemaRoleEnum
-    
-    # Mapear el género a la enumeración correspondiente
-    gender_value = current_user.gender if current_user.gender else "other"
-    
-    if gender_value == "female":
-        gender_enum = GenderEnum.FEMALE
-    elif gender_value == "male":
-        gender_enum = GenderEnum.MALE
-    else:
-        gender_enum = GenderEnum.OTHER
-    
-    # Mapear el rol a la enumeración correspondiente
-    role_value = current_user.role if current_user.role else "student"
-    
-    if role_value == "administrator":
-        role_enum = SchemaRoleEnum.ADMINISTRATOR
-    elif role_value == "teacher":
-        role_enum = SchemaRoleEnum.TEACHER
-    elif role_value == "parent":
-        role_enum = SchemaRoleEnum.PARENT
-    else:
-        role_enum = SchemaRoleEnum.STUDENT
-    
+    # Import GenderEnum directly as it's not aliased like RoleEnum in the specific import line
+    from app.schemas.user import GenderEnum 
+
+    # Mapear género
+    # current_user.gender is a string like 'MALE', 'FEMALE', 'OTHER'
+    # GenderEnum(value) will convert the string to the Pydantic enum member
+    gender_enum_for_response = GenderEnum(current_user.gender if current_user.gender else 'OTHER')
+
+    # Obtener el nombre del rol del usuario actual (e.g., "STUDENT")
+    user_role_name_str = current_user.role # This is a string like "STUDENT"
+
+    # Buscar el objeto Role completo en la base de datos usando el nombre del rol
+    role_db_object = db.query(RoleModel).filter(RoleModel.name == user_role_name_str).first()
+
+    if not role_db_object:
+        # This shouldn't happen if data is consistent (user has a role that exists in roles table)
+        # Consider how to handle this: raise error, or default role, or make role Optional in UserResponse
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Role '{user_role_name_str}' assigned to user but not found in roles table."
+        )
+
     # Crear el objeto UserResponse
+    # Pydantic will use role_db_object (a RoleModel instance)
+    # and convert it to RoleSchemaResponse (defined in UserResponse.role) due to `from_attributes = True`
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
@@ -216,8 +208,8 @@ async def read_users_me(
         phone=current_user.phone,
         direction=current_user.direction,
         birth_date=current_user.birth_date,
-        gender=gender_enum,
-        role=role_enum,
+        gender=gender_enum_for_response, # Pass the Pydantic GenderEnum member
+        role=role_db_object,  # Pass the full RoleModel SQLAlchemy object
         photo=current_user.photo,
         is_active=current_user.is_active,
         is_superuser=current_user.is_superuser

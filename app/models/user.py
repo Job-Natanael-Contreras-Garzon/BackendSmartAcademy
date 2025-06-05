@@ -1,19 +1,19 @@
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 from app.models.associations import user_role
 import enum
 
 class GenderEnum(str, enum.Enum):
-    FEMALE = "female"
-    MALE = "male"
-    OTHER = "other"
+    FEMALE = "FEMALE"
+    MALE = "MALE"
+    OTHER = "OTHER"
 
 class RoleEnum(str, enum.Enum):
-    STUDENT = "student"
-    TEACHER = "teacher"
-    PARENT = "parent"
-    ADMINISTRATOR = "administrator"
+    STUDENT = "STUDENT"
+    TEACHER = "TEACHER"
+    PARENT = "PARENT"
+    ADMINISTRATOR = "ADMINISTRATOR"
 
 class User(Base):
     __tablename__ = "users"
@@ -26,8 +26,8 @@ class User(Base):
     direction = Column(String, nullable=True)
     birth_date = Column(String, nullable=True)
     photo = Column(String, nullable=True)
-    gender = Column(Enum(GenderEnum), default=GenderEnum.OTHER)
-    role = Column(Enum(RoleEnum), default=RoleEnum.STUDENT)
+    gender = Column(SQLEnum(GenderEnum), default=GenderEnum.OTHER)
+    role = Column(SQLEnum(RoleEnum), default=RoleEnum.STUDENT)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     
