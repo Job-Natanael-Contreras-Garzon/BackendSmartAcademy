@@ -160,17 +160,17 @@ async def read_users(
         
         user_responses.append(
             UserResponse(
-                id=user.id,
-                email=user.email,
-                full_name=user.full_name,
-                phone=user.phone,
-                direction=user.direction,
-                birth_date=user.birth_date,
+                id=user_row.id,
+                email=user_row.email,
+                full_name=user_row.full_name,
+                phone=user_row.phone,
+                direction=user_row.direction,
+                birth_date=user_row.birth_date,
                 gender=gender_enum,
                 role=role_response_obj, # Pass the fully constructed RoleResponse object
                 photo=None,
-                is_active=user.is_active,
-                is_superuser=user.is_superuser
+                is_active=user_row.is_active,
+                is_superuser=user_row.is_superuser
             )
         )
     

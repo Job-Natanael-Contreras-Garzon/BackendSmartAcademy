@@ -188,8 +188,8 @@ class MLService:
         if len(x) < 2:
             return 0
             
-        x_vals = np.array(x)
-        y_vals = np.array(y)
+        x_vals = np.array(x, dtype=float)
+        y_vals = np.array(y, dtype=float)
         
         # Calcular pendiente con regresión lineal simple
         slope = np.polyfit(x_vals, y_vals, 1)[0]
